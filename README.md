@@ -204,7 +204,7 @@ Full API documentation is available in [`docs/api-contract.md`](docs/api-contrac
 
 ### Database Schema
 
-Full schema is available in [`docs/DATABASE.md`](docs/DATABASE.md)
+Full schema is available in [`docs/DATABASE.md`](docs/database.md)
 
 **Core Tables:**
 
