@@ -1,86 +1,94 @@
-/* color palette from <https://github.com/vuejs/theme> */
+/* =====================================================
+   Tsuyanki – Global Theme Variables
+   Override shadcn/ui default theme
+   ===================================================== */
+
+/* ---------- Light Theme ---------- */
 :root {
-  --vt-c-white: #ffffff;
-  --vt-c-white-soft: #f8f8f8;
-  --vt-c-white-mute: #f2f2f2;
+  /* Base surfaces */
+  --background: 210 40% 98%; /* slate-50 */
+  --foreground: 222 47% 11%; /* slate-900 */
 
-  --vt-c-black: #181818;
-  --vt-c-black-soft: #222222;
-  --vt-c-black-mute: #282828;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
 
-  --vt-c-indigo: #2c3e50;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
 
-  --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
-  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
-  --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
-  --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
+  /* Primary (Indigo) */
+  --primary: 231 48% 48%; /* indigo-600 */
+  --primary-foreground: 0 0% 100%;
 
-  --vt-c-text-light-1: var(--vt-c-indigo);
-  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
-  --vt-c-text-dark-1: var(--vt-c-white);
-  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+  /* Secondary / muted */
+  --secondary: 220 14% 96%; /* slate-100 */
+  --secondary-foreground: 222 47% 11%;
+
+  --muted: 220 14% 96%;
+  --muted-foreground: 215 16% 47%; /* slate-500 */
+
+  /* Accent (used sparingly) */
+  --accent: 231 48% 94%; /* indigo-50 */
+  --accent-foreground: 231 48% 30%;
+
+  /* Status */
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Borders & inputs */
+  --border: 214 32% 91%; /* slate-200 */
+  --input: 214 32% 91%;
+  --ring: 231 48% 48%;
+
+  /* Radius */
+  --radius: 0.5rem;
 }
 
-/* semantic color variables for this project */
-:root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
+/* ---------- Dark Theme ---------- */
+.dark {
+  --background: 222 47% 11%; /* slate-900 */
+  --foreground: 210 40% 98%; /* slate-50 */
 
-  --color-border: var(--vt-c-divider-light-2);
-  --color-border-hover: var(--vt-c-divider-light-1);
+  --card: 222 47% 13%;
+  --card-foreground: 210 40% 98%;
 
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
+  --popover: 222 47% 13%;
+  --popover-foreground: 210 40% 98%;
 
-  --section-gap: 160px;
+  /* Primary (Indigo, softened for dark mode) */
+  --primary: 231 48% 65%; /* indigo-400 */
+  --primary-foreground: 222 47% 11%;
+
+  --secondary: 217 19% 27%; /* slate-700 */
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 217 19% 27%;
+  --muted-foreground: 215 20% 65%;
+
+  --accent: 231 48% 25%;
+  --accent-foreground: 210 40% 98%;
+
+  --destructive: 0 62% 40%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 217 19% 27%;
+  --input: 217 19% 27%;
+  --ring: 231 48% 65%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
+/* ---------- Global Base Styles ---------- */
 
-    --color-border: var(--vt-c-divider-dark-2);
-    --color-border-hover: var(--vt-c-divider-dark-1);
-
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-2);
-  }
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  font-weight: normal;
+* {
+  border-color: hsl(var(--border));
 }
 
 body {
-  min-height: 100vh;
-  color: var(--color-text);
-  background: var(--color-background);
-  transition:
-    color 0.5s,
-    background-color 0.5s;
-  line-height: 1.6;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
-  font-size: 15px;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Make focus ring calm (important for learning apps) */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.4);
 }
