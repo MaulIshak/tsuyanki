@@ -55,12 +55,6 @@ The main goal is **not to "replace Anki"**, but to:
 - RESTful API for integration with frontend/mobile apps
 - Pagination, filtering, and search across all endpoints
 
-### 🤖 AI-Ready Architecture
-
-- Flexible data structure for AI-generated content
-- API-first design for AI service integration
-- Field schema supporting various content types
-
 ---
 
 ## 🏗️ Architecture
@@ -69,7 +63,7 @@ The main goal is **not to "replace Anki"**, but to:
 
 **Backend:**
 
-- Laravel 11.x (PHP 8.2+)
+- Laravel 12.x (PHP 8.2+)
 - PostgreSQL (JSONB support for field storage)
 - Laravel Sanctum (API authentication)
 
