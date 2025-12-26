@@ -3,7 +3,7 @@
 > A modern, user-friendly spaced repetition system for effective learning
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Laravel](https://img.shields.io/badge/Laravel-11.x-red.svg)](https://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
 [![API Version](https://img.shields.io/badge/API-v1-green.svg)](docs/API.md)
 
 ---
