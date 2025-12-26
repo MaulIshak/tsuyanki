@@ -6,6 +6,10 @@
 [![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
 [![API Version](https://img.shields.io/badge/API-v1-green.svg)](docs/API.md)
 
+### Progress:
+
+![](https://geps.dev/progress/5)
+
 ---
 
 ## 🎯 About Tsuyanki
