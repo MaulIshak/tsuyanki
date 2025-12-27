@@ -33,6 +33,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 import { toast } from 'vue-sonner'
 
 const router = useRouter()
@@ -43,6 +53,8 @@ const deckId = route.params.id
 // State
 const deck = ref(null)
 const notes = ref([])
+const totalNotes = ref(0)
+const currentPage = ref(1)
 const isLoading = ref(true)
 
 // Fetch Deck Details
@@ -63,17 +75,18 @@ const fetchNotes = async () => {
     isLoading.value = true
     const token = localStorage.getItem('auth_token')
     try {
-        // Assuming there is an endpoint to get notes filtered by deck or accessing via deck relationship
-        // If not, we might need to rely on the deck response if it includes cards, 
-        // BUT for a scalable management view, pagination is key.
-        // Let's assumme GET /notes?deck_id=ID for now as per plan/contract implication
-        // Use the nested route as defined in api.php
-        const { data } = await useFetch(`${API_BASE_URL}/decks/${deckId}/notes?limit=100`, {
+        const url = new URL(`${API_BASE_URL}/decks/${deckId}/notes`)
+        url.searchParams.append('page', currentPage.value)
+        url.searchParams.append('limit', 10) // Reduced limit for mobile perfs + pagination demo
+
+        const { data } = await useFetch(url.toString(), {
             headers: { Authorization: `Bearer ${token}` }
         }).json()
         
         if (data.value) {
              notes.value = data.value.data
+             totalNotes.value = data.value.meta.total
+             currentPage.value = data.value.meta.current_page
         }
     } catch (e) {
         toast.error('Failed to load cards')
@@ -103,6 +116,7 @@ const executeDeleteNote = async () => {
             headers: { Authorization: `Bearer ${token}` }
         })
         notes.value = notes.value.filter(n => n.id !== noteId)
+        totalNotes.value--
         toast.success('Note deleted')
     } catch (e) {
         toast.error('Failed to delete note')
@@ -192,10 +206,63 @@ watch(deck, (newDeck) => {
     }
 }, { immediate: true })
 
+const getNoteFront = (note) => {
+    if (!note.fields) return { label: 'Front', content: 'N/A' }
+    
+    // Explicit exclusions (common metadata fields)
+    const excludeKeys = ['pos', 'part of speech', 'id', 'audio', 'sound', 'image', 'picture', 'note', 'notes']
+    // Priorities for Front
+    const priorityKeys = ['expression', 'vocabulary', 'vocab', 'word', 'kanji', 'term', 'front', 'question', 'kana']
+    
+    const keys = Object.keys(note.fields)
+    const lowerMap = keys.reduce((acc, k) => {
+        acc[k.toLowerCase()] = k
+        return acc
+    }, {})
+
+    // Check priorities
+    for (const key of priorityKeys) {
+        if (lowerMap[key]) return { label: lowerMap[key], content: note.fields[lowerMap[key]] }
+    }
+    
+    // Fallback: Find first field that is NOT in exclude list and has content
+    for (const key of keys) {
+        if (!excludeKeys.includes(key.toLowerCase())) {
+            return { label: key, content: note.fields[key] }
+        }
+    }
+    
+    const firstKey = keys[0]
+    return { label: firstKey || 'Front', content: note.fields[firstKey] || 'N/A' }
+}
+
+const getNoteBack = (note) => {
+    if (!note.fields) return { label: 'Back', content: '' }
+    
+    const excludeKeys = ['audio', 'sound', 'image', 'picture']
+    const priorityKeys = ['meaning', 'definition', 'english', 'reading', 'back', 'answer', 'glossary']
+    const keys = Object.keys(note.fields)
+    const lowerMap = keys.reduce((acc, k) => {
+        acc[k.toLowerCase()] = k
+        return acc
+    }, {})
+
+    for (const key of priorityKeys) {
+        if (lowerMap[key]) return { label: lowerMap[key], content: note.fields[lowerMap[key]] }
+    }
+
+    // Fallback: Second non-excluded field?
+    const validKeys = keys.filter(k => !excludeKeys.includes(k.toLowerCase()))
+    if (validKeys.length > 1) {
+        return { label: validKeys[1], content: note.fields[validKeys[1]] }
+    }
+
+    return { label: 'Back', content: '' }
+}
 </script>
 
 <template>
-  <div class="p-6 max-w-7xl mx-auto space-y-6">
+  <div class="max-w-7xl mx-auto space-y-6">
     
     <!-- Back & Header -->
     <div class="space-y-4">
@@ -230,14 +297,57 @@ watch(deck, (newDeck) => {
         </TabsList>
 
         <TabsContent value="cards" class="space-y-4">
-             <!-- Search/Filter Bar could go here -->
             
-            <div class="rounded-md border bg-white dark:bg-slate-900">
+            <!-- Mobile List (Visible on sm/mobile only, < sm:hidden) -->
+            <div class="space-y-4 md:hidden">
+                <div v-if="isLoading" class="space-y-4">
+                     <Skeleton v-for="i in 3" :key="i" class="h-32 w-full rounded-lg" />
+                </div>
+                <div v-else-if="notes.length === 0" class="text-center py-12 text-slate-500 border-2 border-dashed rounded-lg">
+                    No cards found. Start by adding one!
+                </div>
+                <div v-else v-for="note in notes" :key="note.id" class="rounded-lg border bg-white dark:bg-slate-900 p-4 space-y-3 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <!-- Use note_type related name if available, fallback safely -->
+                        <Badge variant="secondary" class="text-xs shrink-0">{{ note.note_type?.name || note.type?.name || 'Card' }}</Badge>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger as-child>
+                                <Button variant="ghost" class="h-8 w-8 p-0 -mr-2 -mt-2 text-slate-400">
+                                    <span class="sr-only">Open menu</span>
+                                    <MoreHorizontal class="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem @click="navigateToEdit(note.id)">
+                                    <Pencil class="mr-2 h-4 w-4" /> Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem @click="confirmDeleteNote(note)" class="text-red-600 focus:text-red-600">
+                                    <Trash2 class="mr-2 h-4 w-4" /> Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    
+                    <div class="grid gap-2">
+                        <div v-if="getNoteFront(note).content">
+                            <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">{{ getNoteFront(note).label }}</div>
+                            <div class="font-medium text-lg leading-snug break-words" v-html="getNoteFront(note).content"></div>
+                        </div>
+                        <div v-if="getNoteBack(note).content" class="border-t pt-2 mt-1">
+                            <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">{{ getNoteBack(note).label }}</div>
+                            <div class="text-slate-600 dark:text-slate-300 leading-snug break-words" v-html="getNoteBack(note).content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop Table (Hidden on mobile, visible md+) -->
+            <div class="hidden md:block rounded-md border bg-white dark:bg-slate-900">
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead class="w-[300px]">Front</TableHead>
-                            <TableHead class="w-[300px]">Back</TableHead>
+                            <TableHead class="w-[30%]">Front</TableHead>
+                            <TableHead class="w-[40%]">Back</TableHead>
                             <TableHead>Type</TableHead>
                             <TableHead class="text-right">Actions</TableHead>
                         </TableRow>
@@ -257,10 +367,16 @@ watch(deck, (newDeck) => {
                         </TableRow>
 
                         <TableRow v-else v-for="note in notes" :key="note.id">
-                            <TableCell class="font-medium truncate max-w-[300px]" v-html="note.fields?.Front || note.fields?.front || note.front_html || 'N/A'"></TableCell>
-                            <TableCell class="truncate max-w-[300px]" v-html="note.fields?.Back || note.fields?.back || note.back_html || 'N/A'"></TableCell>
+                            <TableCell class="font-medium truncate max-w-[300px]">
+                                <span class="text-xs text-slate-400 block mb-0.5">{{ getNoteFront(note).label }}</span>
+                                <span v-html="getNoteFront(note).content"></span>
+                            </TableCell>
+                            <TableCell class="truncate max-w-[300px]">
+                                <span class="text-xs text-slate-400 block mb-0.5">{{ getNoteBack(note).label }}</span>
+                                <span v-html="getNoteBack(note).content"></span>
+                            </TableCell>
                             <TableCell>
-                                <Badge variant="secondary" class="text-xs">{{ note.type?.name || 'Basic' }}</Badge>
+                                <Badge variant="secondary" class="text-xs">{{ note.note_type?.name || note.type?.name || 'Card' }}</Badge>
                             </TableCell>
                             <TableCell class="text-right">
                                 <DropdownMenu>
@@ -274,7 +390,7 @@ watch(deck, (newDeck) => {
                                         <DropdownMenuItem @click="navigateToEdit(note.id)">
                                             <Pencil class="mr-2 h-4 w-4" /> Edit
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem class="text-red-600 focus:text-red-600" @click="confirmDeleteNote(note)">
+                                        <DropdownMenuItem @click="confirmDeleteNote(note)" class="text-red-600 focus:text-red-600">
                                             <Trash2 class="mr-2 h-4 w-4" /> Delete
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
@@ -284,6 +400,27 @@ watch(deck, (newDeck) => {
                     </TableBody>
                 </Table>
             </div>
+
+            <!-- Pagination -->
+            <div v-if="totalNotes > 10" class="py-4">
+                 <Pagination v-slot="{ page }" :total="totalNotes" :sibling-count="1" show-edges :default-page="1" :items-per-page="10" @update:page="(val) => { currentPage = val; fetchNotes() }">
+                  <PaginationContent v-slot="{ items }" class="flex items-center gap-1 justify-center">
+                    <PaginationFirst />
+                    <PaginationPrevious />
+                    <template v-for="(item, index) in items">
+                      <PaginationItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+                        <Button class="w-9 h-9 p-0" :variant="item.value === page ? 'default' : 'outline'">
+                          {{ item.value }}
+                        </Button>
+                      </PaginationItem>
+                      <PaginationEllipsis v-else :key="item.type" :index="index" />
+                    </template>
+                    <PaginationNext />
+                    <PaginationLast />
+                  </PaginationContent>
+                </Pagination>
+            </div>
+            
         </TabsContent>
 
         <TabsContent value="settings">

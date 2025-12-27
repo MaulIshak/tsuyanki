@@ -131,7 +131,7 @@ const navigateToDeck = (id) => {
 </script>
 
 <template>
-  <div class="p-6 space-y-6 max-w-7xl mx-auto">
+  <div class="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>

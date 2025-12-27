@@ -25,27 +25,30 @@ const noteId = route.params.noteId // For editing existing note
 // State
 const noteTypes = ref([])
 const selectedNoteTypeId = ref(null)
-const fields = ref({
-    front: '',
-    back: ''
-})
+const fields = ref({})
 const tags = ref('')
 const isLoading = ref(false)
 const isSubmitting = ref(false)
+
+// Computed
+const activeFields = computed(() => {
+    const type = noteTypes.value.find(t => t.id === selectedNoteTypeId.value)
+    if (!type || !type.field_schema || !type.field_schema.fields) return []
+    return type.field_schema.fields
+})
 
 // Fetch Note Types
 const fetchNoteTypes = async () => {
     const token = localStorage.getItem('auth_token')
     try {
-        const { data } = await useFetch(`${API_BASE_URL}/note-types`, {
+        const { data } = await useFetch(`${API_BASE_URL}/note-types?per_page=100`, {
             headers: { Authorization: `Bearer ${token}` }
         }).json()
         
-        if (data.value) {
+        if (data.value && data.value.data) {
             noteTypes.value = data.value.data
-            // Select default if available (e.g., Basic)
-            if (noteTypes.value.length > 0) {
-                 // Try to find 'Basic' or default to first
+            // Select default if available and not editing
+            if (!noteId && noteTypes.value.length > 0) {
                  const basic = noteTypes.value.find(t => t.name.toLowerCase().includes('basic'))
                  selectedNoteTypeId.value = basic ? basic.id : noteTypes.value[0].id
             }
@@ -71,6 +74,10 @@ const fetchNote = async () => {
              selectedNoteTypeId.value = note.note_type_id
              fields.value = { ...note.fields } // Clone fields
              // Tags handling if needed
+             if (note.tags && Array.isArray(note.tags)) {
+                 // Format tags if they come as array of objects or strings. 
+                 // Assuming simple array of strings or logic needed later.
+             }
         }
     } catch (e) {
          toast.error('Failed to load note')
@@ -80,8 +87,10 @@ const fetchNote = async () => {
 }
 
 const onSubmit = async () => {
-    if (!fields.value.front || !fields.value.back) {
-        toast.error('Front and Back fields are required')
+    // Basic validation: ensure at least one field is filled or check required fields
+    const filledCount = Object.values(fields.value).filter(v => v && v.trim()).length
+    if (filledCount === 0) {
+        toast.error('Please fill in at least one field')
         return
     }
 
@@ -119,12 +128,9 @@ const onSubmit = async () => {
         toast.success(noteId ? 'Note updated' : 'Note created')
         
         if (!noteId) {
-            // If creating, maybe user wants to add another?
-            // For now, redirect back to deck
-            // Confirm/Ask pattern: Clear form?
-            fields.value.front = ''
-            fields.value.back = ''
-            // Optional: stay on page to add more
+            // Clear fields but keep type selection
+            fields.value = {}
+            tags.value = ''
         } else {
             router.back()
         }
@@ -144,7 +150,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6 max-w-3xl mx-auto space-y-6">
+  <div class="p-4 lg:p-6 max-w-3xl mx-auto space-y-6">
     <Button variant="ghost" class="pl-0 gap-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100" @click="router.back()">
         <ArrowLeft class="w-4 h-4" /> Back
     </Button>
@@ -173,17 +179,21 @@ onMounted(() => {
                 </Select>
             </div>
 
-            <!-- Fields -->
-            <div class="space-y-4">
-                 <div class="space-y-2">
-                    <label class="text-sm font-medium">Front</label>
-                    <Textarea v-model="fields.front" placeholder="Front content..." class="resize-none h-32 font-medium text-lg" />
+            <!-- Dynamic Fields -->
+            <div class="space-y-4" v-if="activeFields.length > 0">
+                 <div v-for="field in activeFields" :key="field.name" class="space-y-2">
+                    <label class="text-sm font-medium">{{ field.name }}</label>
+                    <Textarea 
+                        v-model="fields[field.name]" 
+                        :placeholder="`${field.name} content...`" 
+                        class="resize-none font-medium"
+                        :class="field.name.toLowerCase().includes('expression') || field.name.toLowerCase().includes('front') ? 'h-24 text-lg' : 'h-16'" 
+                    />
                  </div>
-                 
-                 <div class="space-y-2">
-                    <label class="text-sm font-medium">Back</label>
-                    <Textarea v-model="fields.back" placeholder="Back content..." class="resize-none h-32" />
-                 </div>
+            </div>
+            <div v-else class="py-8 text-center text-slate-500">
+                <Loader2 v-if="isLoading" class="w-6 h-6 animate-spin mx-auto" />
+                <span v-else>Select a note type to see fields.</span>
             </div>
 
              <!-- Tags (Optional) -->
@@ -193,13 +203,13 @@ onMounted(() => {
             </div>
 
         </CardContent>
-        <CardFooter class="flex justify-between">
-             <span class="text-xs text-slate-400 italic">
+        <CardFooter class="flex flex-col-reverse sm:flex-row justify-between sm:items-center gap-4">
+             <span class="text-xs text-slate-400 italic text-center sm:text-left">
                 * Cards are generated based on the selected Type.
              </span>
-            <div class="flex gap-2">
-                 <Button variant="ghost" @click="router.back()">Cancel</Button>
-                 <Button @click="onSubmit" :disabled="isSubmitting">
+            <div class="flex gap-2 w-full sm:w-auto">
+                 <Button variant="ghost" class="flex-1 sm:flex-none" @click="router.back()">Cancel</Button>
+                 <Button class="flex-1 sm:flex-none" @click="onSubmit" :disabled="isSubmitting">
                     <Loader2 v-if="isSubmitting" class="w-4 h-4 mr-2 animate-spin" />
                     <Save v-else class="w-4 h-4 mr-2" />
                     {{ noteId ? 'Save Changes' : 'Add Note' }}

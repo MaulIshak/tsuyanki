@@ -141,10 +141,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col max-w-4xl mx-auto w-full p-4 lg:p-8">
+  <div class="min-h-full flex flex-col max-w-4xl mx-auto w-full p-4 lg:p-8">
     
     <!-- Header / Progress -->
-    <div class="mb-8 space-y-2">
+    <div class="mb-8 space-y-2 shrink-0">
       <div class="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
         <span class="font-medium">Daily Review</span>
         <span>{{ sessionStats.reviewed }} / {{ sessionStats.total }}</span>
@@ -153,10 +153,10 @@ onUnmounted(() => {
     </div>
 
     <!-- Main Card Area -->
-    <div class="flex-1 flex flex-col items-center justify-center min-h-[400px]">
+    <div class="flex-1 flex flex-col items-center w-full relative">
       
       <!-- Loading State -->
-      <div v-if="isLoading" class="w-full max-w-2xl space-y-4">
+      <div v-if="isLoading" class="w-full max-w-2xl space-y-4 my-auto">
         <Skeleton class="h-[300px] w-full rounded-xl" />
         <div class="flex justify-center gap-4">
            <Skeleton class="h-12 w-24" />
@@ -165,7 +165,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Empty State / Session Complete -->
-      <div v-else-if="!currentCard" class="text-center space-y-6">
+      <div v-else-if="!currentCard" class="text-center space-y-6 my-auto">
          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 mb-4">
             <CheckCircle2 class="w-10 h-10" />
          </div>
@@ -184,7 +184,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Flashcard -->
-      <Card v-else class="w-full max-w-2xl shadow-xl border-t-4 border-t-indigo-500 dark:bg-slate-900">
+      <Card v-else class="w-full max-w-2xl shadow-xl border-t-4 border-t-indigo-500 dark:bg-slate-900 my-auto mb-8">
         <CardHeader>
            <div class="flex justify-between items-center">
               <Badge variant="outline" class="uppercase tracking-wide text-[10px]">{{ currentCard.template?.name || 'Standard' }}</Badge>
@@ -192,10 +192,10 @@ onUnmounted(() => {
            </div>
         </CardHeader>
         
-        <CardContent class="text-center py-10 px-6 min-h-[200px] flex flex-col justify-center items-center gap-8">
+        <CardContent class="py-6 px-6 min-h-[200px] flex flex-col gap-6 max-h-[60vh] overflow-y-auto w-full">
             <!-- Front -->
-            <div class="prose dark:prose-invert max-w-none text-2xl font-medium">
-               <div v-html="currentCard.front_html"></div>
+            <div class="prose dark:prose-invert max-w-none text-center w-full break-words">
+               <div class="text-xl font-medium" v-html="currentCard.front_html"></div>
             </div>
 
             <!-- Answer Divider -->
@@ -206,8 +206,8 @@ onUnmounted(() => {
             </div>
 
             <!-- Back -->
-            <div v-if="isRevealed" class="prose dark:prose-invert max-w-none text-xl text-slate-600 dark:text-slate-300 animate-in slide-in-from-bottom-2 duration-300">
-                <div v-html="currentCard.back_html"></div>
+            <div v-if="isRevealed" class="prose dark:prose-invert max-w-none w-full break-words animate-in slide-in-from-bottom-2 duration-300 text-left">
+                <div class="text-lg" v-html="currentCard.back_html"></div>
             </div>
         </CardContent>
 

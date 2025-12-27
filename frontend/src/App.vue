@@ -3,10 +3,10 @@ import { Toaster } from '@/components/ui/sonner'
 </script>
 
 <template>
-  <main class="min-h-screen w-full bg-background antialiased">
+  <div class="h-full w-full bg-background antialiased">
     <RouterView />
     <Toaster />
-  </main>
+  </div>
 </template>
 
 <style>
@@ -15,6 +15,6 @@ body, html, #app {
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 </style>

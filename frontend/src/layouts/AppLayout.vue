@@ -15,7 +15,7 @@ provide('isSidebarCollapsed', isSidebarCollapsed)
 
 <template>
   <div 
-    class="grid h-screen w-full overflow-hidden transition-all duration-300 ease-in-out"
+    class="fixed inset-0 grid w-full overflow-hidden transition-all duration-300 ease-in-out bg-background"
     :class="isSidebarCollapsed ? 'md:grid-cols-[70px_1fr] lg:grid-cols-[70px_1fr]' : 'md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]'"
   >
     <!-- Desktop Sidebar -->

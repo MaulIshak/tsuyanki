@@ -41,9 +41,6 @@ class Card extends Model
     public function getFrontHtmlAttribute(): string
     {
         if (!$this->relationLoaded('note') || !$this->relationLoaded('template')) {
-            // Attempt to load if not loaded? Or return empty?
-            // Safer to return empty or try to lazy load if critical, but performance-wise better to eager load.
-            // For now, let's allow lazy loading if it helps debugging, but ideally eager load.
             if ($this->note && $this->template) {
                 return $this->renderTemplate($this->template->front_template, $this->note->fields);
             }
@@ -70,13 +67,96 @@ class Card extends Model
         if (!$fields)
             return $template;
 
+        // Normalize template newlines
+        $template = str_replace(["\r\n", "\r"], "\n", $template);
+
+        // Max iterations to prevent infinite loops (though Anki templates are finite)
+        $maxIterations = 10;
+        $iteration = 0;
+
+        // Handle Conditionals iteratively to support nesting
+        do {
+            $replaced = false;
+            $iteration++;
+
+            // 1. Handle Conditional Blocks: {{#Field}}...{{/Field}}
+            $template = preg_replace_callback('/\{\{#\s*(.+?)\s*\}\}([\s\S]*?)\{\{\/\s*\1\s*\}\}/', function ($matches) use ($fields, &$replaced) {
+                $key = $matches[1];
+                $content = $matches[2];
+                $value = $this->getFieldValue($fields, $key);
+                $replaced = true;
+
+                return !empty($value) ? $content : '';
+            }, $template, -1, $count);
+
+            if ($count > 0)
+                $replaced = true;
+
+            // 2. Handle Inverted Conditional Blocks: {{^Field}}...{{/Field}}
+            $template = preg_replace_callback('/\{\{\^\s*(.+?)\s*\}\}([\s\S]*?)\{\{\/\s*\1\s*\}\}/', function ($matches) use ($fields, &$replaced) {
+                $key = $matches[1];
+                $content = $matches[2];
+                $value = $this->getFieldValue($fields, $key);
+                $replaced = true; // Mark as replaced to continue loop
+
+                return empty($value) ? $content : '';
+            }, $template, -1, $countInv);
+
+            if ($countInv > 0)
+                $replaced = true;
+
+        } while ($replaced && $iteration < $maxIterations);
+
+        // 3. Handle Variable Replacement: {{Field}} and {{filter:Field}}
         return preg_replace_callback('/\{\{(.*?)\}\}/', function ($matches) use ($fields) {
-            $key = $matches[1];
+            $rawKey = trim($matches[1]);
+
+            // Ignore control tags if any left
+            if (str_starts_with($rawKey, '#') || str_starts_with($rawKey, '^') || str_starts_with($rawKey, '/')) {
+                return $matches[0];
+            }
+
+            // Handle filters like "furigana:FieldName" or "hint:FieldName"
+            $parts = explode(':', $rawKey);
+            $key = end($parts);
+            $filter = count($parts) > 1 ? reset($parts) : null;
+
             if ($key === 'FrontSide') {
                 return $this->front_html;
             }
-            // Check for both casing just in case
-            return $fields[$key] ?? $fields[ucfirst($key)] ?? $fields[strtolower($key)] ?? $matches[0];
+
+            $value = $this->getFieldValue($fields, $key);
+
+            if ($value === null) {
+                return '';
+            }
+
+            // Apply filters
+            if ($filter === 'furigana') {
+                // Convert "Kanji[Kana]" to ruby tags
+                return preg_replace('/ ?([^ >]+?)\[(.+?)\]/', '<ruby>$1<rt>$2</rt></ruby>', $value);
+            }
+            if ($filter === 'hint') {
+                return $value;
+            }
+
+            return $value;
         }, $template);
+    }
+
+    private function getFieldValue(array $fields, string $key): ?string
+    {
+        // Direct match
+        if (isset($fields[$key]))
+            return $fields[$key];
+
+        // Case-insensitive match
+        foreach ($fields as $k => $v) {
+            if (strcasecmp($k, $key) === 0) {
+                return $v;
+            }
+        }
+
+        return null;
     }
 }

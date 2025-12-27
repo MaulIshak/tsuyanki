@@ -35,12 +35,21 @@ const handleSwitchToLogin = () => {
         </blockquote>
       </div>
     </div>
-    <div class="lg:p-8">
-      <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-87.5">
-        <RegisterForm 
-          @auth-success="handleAuthSuccess"
-          @switch-to-login="handleSwitchToLogin"
-        />
+    <div class="flex h-full items-center justify-center p-6 lg:p-8">
+      <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
+         <!-- Mobile Logo -->
+        <div class="flex flex-col items-center gap-2 text-center lg:hidden">
+             <img src="/logo.png" alt="Tsuyanki" class="h-12 w-auto" />
+             <h1 class="text-2xl font-semibold tracking-tight">Create an account</h1>
+             <p class="text-sm text-muted-foreground">Start your learning journey today</p>
+        </div>
+
+        <div class="bg-white/50 backdrop-blur-sm dark:bg-slate-900/50 p-6 sm:p-8 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800">
+            <RegisterForm 
+              @auth-success="handleAuthSuccess"
+              @switch-to-login="handleSwitchToLogin"
+            />
+        </div>
       </div>
     </div>
   </div>

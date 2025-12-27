@@ -66,7 +66,7 @@ const router = createRouter({
         {
           path: 'import',
           name: 'import',
-          component: () => import('../views/DashboardView.vue') // Placeholder
+          component: () => import('../views/ImportView.vue')
         },
         {
           path: 'settings',

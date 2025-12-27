@@ -47,5 +47,8 @@ Route::prefix('v1')->group(function () {
 
         // Tags
         Route::apiResource('tags', \App\Http\Controllers\Api\TagController::class);
+
+        // Import
+        Route::post('import/anki', [\App\Http\Controllers\Api\AnkiImportController::class, 'store']);
     });
 });

@@ -39,8 +39,10 @@ class UserContentSeeder extends Seeder
             ['name' => 'Basic'],
             [
                 'field_schema' => [
-                    ['name' => 'Front', 'type' => 'text'],
-                    ['name' => 'Back', 'type' => 'text'],
+                    'fields' => [
+                        ['name' => 'Front', 'type' => 'text'],
+                        ['name' => 'Back', 'type' => 'text'],
+                    ]
                 ]
             ]
         );

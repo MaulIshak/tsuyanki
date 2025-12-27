@@ -79,7 +79,7 @@ const handleLogout = async (event) => {
         <nav class="grid gap-2 text-lg font-medium">
           <a
             href="#"
-            class="flex items-center gap-2 text-lg font-semibold mb-4"
+            class="flex items-center gap-2 text-lg font-semibold mb-6 pt-6 pl-6"
           >
             <img src="/logo.png" alt="Tsuyanki" class="h-8 w-auto dark:brightness-0 dark:invert" />
             <span class="text-slate-900 dark:text-slate-100">Tsuyanki</span>
