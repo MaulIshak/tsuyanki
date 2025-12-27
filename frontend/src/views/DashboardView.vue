@@ -34,8 +34,10 @@ const headers = { Authorization: `Bearer ${token}`, Accept: 'application/json' }
 const loading = ref(true)
 const dueCount = ref(0)
 const reviewedToday = ref(0)
-const streak = ref(0) // Mocked for now as backend might not return it yet fully
-const recentActivity = ref([4, 10, 2, 15, 8, 12, 5]) // Mocked last 7 days
+const mastery = ref(0)
+const streak = ref(0)
+const recentActivity = ref([])
+const recentDecks = ref([])
 
 // Fetch Data
 const fetchDashboardData = async () => {
@@ -52,9 +54,16 @@ const fetchDashboardData = async () => {
     if (statsData.value) {
       reviewedToday.value = statsData.value.reviews_completed
       streak.value = statsData.value.streak
+      mastery.value = statsData.value.total_mastery
       if (statsData.value.recent_activity) {
           recentActivity.value = statsData.value.recent_activity
       }
+    }
+
+    // 3. Recent Decks
+    const { data: decksData } = await useFetch(`${API_BASE}/decks`, { headers }).json()
+    if (decksData.value) {
+        recentDecks.value = decksData.value.data.slice(0, 3) 
     }
   } catch (error) {
     console.error('Failed to fetch dashboard data', error)
@@ -114,40 +123,48 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
                         <Play class="w-5 h-5 mr-2 fill-current" />
                         Start Review Session
                     </Button>
-                    <Button variant="outline" class="w-full sm:w-auto bg-indigo-700/50 border-white/20 text-white hover:bg-indigo-700/70 hover:text-white">
-                        Browse Decks
-                    </Button>
                 </div>
             </CardContent>
         </Card>
 
-        <!-- Quick Stats / Secondary Actions -->
+        <!-- Recent Decks / Secondary Actions -->
         <div class="flex flex-col gap-4">
-             <!-- Create New -->
-            <Card @click="router.push('/decks/create')" class="flex-1 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900/50 hover:shadow-md transition-shadow cursor-pointer group">
-                <CardContent class="flex items-center p-6 h-full">
-                    <div class="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                        <PlusCircle class="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-emerald-900 dark:text-emerald-100">Create New Deck</h3>
-                        <p class="text-sm text-emerald-600/80 dark:text-emerald-400/80">Add your own cards</p>
-                    </div>
-                </CardContent>
-            </Card>
+             <div class="flex items-center justify-between">
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">Your Decks</h3>
+                <Button variant="ghost" size="sm" @click="router.push('/decks')">View All</Button>
+             </div>
+             
+             <div v-if="loading" class="space-y-3">
+                 <Skeleton class="h-16 w-full rounded-lg" />
+                 <Skeleton class="h-16 w-full rounded-lg" />
+             </div>
+             
+             <div v-else-if="recentDecks.length === 0" class="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg text-slate-400">
+                 <PlusCircle class="h-8 w-8 mb-2 opacity-50" />
+                 <p class="text-sm">No decks yet</p>
+                 <Button variant="link" @click="router.push('/decks/create')">Create one</Button>
+             </div>
 
-            <!-- Search -->
-             <Card @click="router.push('/decks')" class="flex-1 bg-sky-50 dark:bg-sky-950/30 border-sky-100 dark:border-sky-900/50 hover:shadow-md transition-shadow cursor-pointer group">
-                <CardContent class="flex items-center p-6 h-full">
-                    <div class="h-12 w-12 rounded-full bg-sky-100 dark:bg-sky-900 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                        <Search class="h-6 w-6 text-sky-600 dark:text-sky-400" />
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-sky-900 dark:text-sky-100">Browse Decks</h3>
-                        <p class="text-sm text-sky-600/80 dark:text-sky-400/80">View your collection</p>
-                    </div>
-                </CardContent>
-            </Card>
+             <div v-else class="space-y-3">
+                 <Card 
+                    v-for="deck in recentDecks" 
+                    :key="deck.id" 
+                    @click="router.push(`/decks/${deck.id}`)"
+                    class="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors cursor-pointer"
+                >
+                    <CardContent class="p-4 flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold text-slate-900 dark:text-slate-100 line-clamp-1">{{ deck.title }}</h4>
+                            <p class="text-xs text-slate-500 line-clamp-1">{{ deck.description || 'No description' }}</p>
+                        </div>
+                        <Play class="h-4 w-4 text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </CardContent>
+                 </Card>
+             </div>
+             
+             <Button variant="outline" class="w-full border-dashed" @click="router.push('/decks/create')">
+                <PlusCircle class="w-4 h-4 mr-2" /> Create New Deck
+             </Button>
         </div>
     </div>
 
@@ -214,9 +231,9 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
              <Skeleton class="h-8 w-20 mb-1" />
           </div>
           <div v-else>
-            <div class="text-3xl font-bold text-slate-900 dark:text-slate-50">85%</div>
+            <div class="text-3xl font-bold text-slate-900 dark:text-slate-50">{{ mastery }}%</div>
             <p class="text-xs text-amber-500 font-medium mt-1">
-              Top 10% of learners
+              Of cards matured
             </p>
           </div>
         </CardContent>

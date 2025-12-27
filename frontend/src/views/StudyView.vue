@@ -11,6 +11,9 @@ import { Separator } from '@/components/ui/separator'
 import { toast } from 'vue-sonner'
 import { Loader2, CheckCircle2, RotateCcw, AlertCircle } from 'lucide-vue-next'
 
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
 const router = useRouter()
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -20,6 +23,7 @@ const currentIndex = ref(0)
 const isRevealed = ref(false)
 const isLoading = ref(true)
 const isSubmitting = ref(false)
+const extraCardsCount = ref(20)
 const sessionStats = ref({
   total: 0,
   reviewed: 0,
@@ -39,12 +43,14 @@ const progressPercentage = computed(() => {
 })
 
 // Fetch Due Cards
-const fetchDueCards = async () => {
+const fetchDueCards = async (force = false, limit = 50) => {
   isLoading.value = true
   const token = localStorage.getItem('auth_token')
+  const query = new URLSearchParams({ limit: limit.toString() })
+  if (force === true) query.append('ignore_limits', '1')
   
   try {
-    const { data } = await useFetch(`${API_BASE_URL}/review/due?limit=50`, {
+    const { data } = await useFetch(`${API_BASE_URL}/review/due?${query.toString()}`, {
       headers: { Authorization: `Bearer ${token}` }
     }).json()
 
@@ -174,13 +180,25 @@ onUnmounted(() => {
            You reviewed {{ sessionStats.reviewed }} cards today. Great job keeping up with your streak!
          </p>
          <div class="flex justify-center gap-4 pt-4">
-            <Button @click="router.push('/dashboard')" size="lg" variant="outline">
-               Back to Dashboard
-            </Button>
-            <Button @click="fetchDueCards" size="lg">
-               <RotateCcw class="w-4 h-4 mr-2" /> Review More
-            </Button>
-         </div>
+             <Button @click="router.push('/dashboard')" size="lg" variant="outline">
+                Back to Dashboard
+             </Button>
+             
+             <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-800">
+                <div class="relative w-20">
+                    <Input 
+                        type="number" 
+                        min="1" 
+                        max="100" 
+                        v-model="extraCardsCount" 
+                        class="h-10 border-0 bg-transparent text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                </div>
+                <Button @click="() => fetchDueCards(true, extraCardsCount)" size="lg">
+                   <RotateCcw class="w-4 h-4 mr-2" /> Review More
+                </Button>
+             </div>
+          </div>
       </div>
 
       <!-- Flashcard -->

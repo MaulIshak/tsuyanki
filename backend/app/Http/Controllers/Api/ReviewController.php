@@ -22,6 +22,8 @@ class ReviewController extends Controller
         // 1. Get Daily Goal from Preferences
         $dailyGoal = $user->preferences['daily_goal'] ?? 20;
 
+        $ignoreLimits = $request->boolean('ignore_limits');
+
         // 2. Count "True New" Cards introduced today
         // A "True New" card introduction is defined as a card receiving its FIRST EVER review log today.
         // This is robust against lapses/relearning logic which generates logs but aren't "introductions".
@@ -33,7 +35,11 @@ class ReviewController extends Controller
             ->get()
             ->count();
 
-        $remainingNewLimit = max(0, $dailyGoal - $newCardsIntroducedToday);
+        if ($ignoreLimits) {
+            $remainingNewLimit = 1000; // Allow studying well beyond the daily limit
+        } else {
+            $remainingNewLimit = max(0, $dailyGoal - $newCardsIntroducedToday);
+        }
 
         // 3. Query Due Review Cards (Priority 1)
         // Definition:
@@ -208,12 +214,18 @@ class ReviewController extends Controller
             }
         }
 
+        // 4. Total Mastery (Mature Cards / Total Learning Cards)
+        // Mature = Interval > 21 days
+        $matureCount = ReviewState::where('user_id', $user->id)->where('interval', '>', 21)->count();
+        $totalLearning = ReviewState::where('user_id', $user->id)->count();
+        $mastery = $totalLearning > 0 ? round(($matureCount / $totalLearning) * 100) : 0;
+
         return response()->json([
             'period' => 'today',
             'reviews_completed' => $todayReviews,
             'recent_activity' => $recentActivity,
             'streak' => $streak,
-            'total_mastery' => 0 // Placeholder, or calc based on Mature cards (interval > 21 days)
+            'total_mastery' => $mastery
         ]);
     }
 }

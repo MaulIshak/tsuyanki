@@ -77,7 +77,7 @@ const fetchNotes = async () => {
     try {
         const url = new URL(`${API_BASE_URL}/decks/${deckId}/notes`)
         url.searchParams.append('page', currentPage.value)
-        url.searchParams.append('limit', 10) // Reduced limit for mobile perfs + pagination demo
+        url.searchParams.append('limit', 20) // Updated to 20 to match user expectation and backend defaults
 
         const { data } = await useFetch(url.toString(), {
             headers: { Authorization: `Bearer ${token}` }
@@ -402,8 +402,8 @@ const getNoteBack = (note) => {
             </div>
 
             <!-- Pagination -->
-            <div v-if="totalNotes > 10" class="py-4">
-                 <Pagination v-slot="{ page }" :total="totalNotes" :sibling-count="1" show-edges :default-page="1" :items-per-page="10" @update:page="(val) => { currentPage = val; fetchNotes() }">
+            <div v-if="totalNotes > 20" class="py-4">
+                 <Pagination v-slot="{ page }" :total="totalNotes" :sibling-count="1" show-edges :default-page="1" :items-per-page="20" @update:page="(val) => { currentPage = val; fetchNotes() }">
                   <PaginationContent v-slot="{ items }" class="flex items-center gap-1 justify-center">
                     <PaginationFirst />
                     <PaginationPrevious />

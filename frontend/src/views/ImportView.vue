@@ -116,7 +116,7 @@ const onUpload = async () => {
 </script>
 
 <template>
-  <div class="p-6 max-w-3xl mx-auto space-y-8">
+  <div class="p-4 sm:p-6 max-w-3xl mx-auto space-y-6 sm:space-y-8">
     
     <!-- Page Header -->
     <div class="flex items-center gap-4">
@@ -124,7 +124,7 @@ const onUpload = async () => {
             <ArrowLeft class="w-4 h-4" />
         </Button>
         <div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Import from Anki</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Import from Anki</h1>
             <p class="text-slate-500 dark:text-slate-400">Migrate your decks and cards effortlessly.</p>
         </div>
     </div>
@@ -166,7 +166,7 @@ const onUpload = async () => {
                 </Alert>
 
                 <div 
-                    class="relative border-2 border-dashed rounded-xl p-12 transition-all cursor-pointer group"
+                    class="relative border-2 border-dashed rounded-xl p-6 sm:p-12 transition-all cursor-pointer group"
                     :class="[
                         isDragging ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-slate-200 hover:border-primary/50 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900',
                         file ? 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800' : ''
@@ -204,12 +204,12 @@ const onUpload = async () => {
                 </Alert>
 
             </CardContent>
-            <CardFooter class="flex justify-between border-t bg-slate-50/50 dark:bg-slate-900/50 p-6">
+            <CardFooter class="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between border-t bg-slate-50/50 dark:bg-slate-900/50 p-4 sm:p-6">
                 <!-- Helper text -->
-                <p class="text-xs text-slate-400 max-w-[60%]">
-                    Need help exporting from Anki? Go to File > Export... and select "Anki Deck Package (*.apkg)".
+                <p class="text-xs text-slate-400 w-full sm:max-w-[60%] text-center sm:text-left order-2 sm:order-1">
+                    Need help exporting from Anki? Go to <span class="font-medium">File > Export...</span> and select "Anki Deck Package (*.apkg)".
                 </p>
-                <Button @click="onUpload" :disabled="!file" size="lg" class="shadow-sm">
+                <Button @click="onUpload" :disabled="!file" size="lg" class="w-full sm:w-auto shadow-sm order-1 sm:order-2">
                     Start Import <ArrowRight class="w-4 h-4 ml-2" />
                 </Button>
             </CardFooter>
@@ -273,9 +273,9 @@ const onUpload = async () => {
                     </TableBody>
                 </Table>
             </CardContent>
-            <CardFooter class="flex justify-between items-center p-6 bg-slate-50/50 dark:bg-slate-900/50 border-t">
-                 <Button variant="outline" @click="reset">Import Another</Button>
-                 <Button @click="router.push('/decks')">View Decks <ArrowRight class="w-4 h-4 ml-2" /></Button>
+            <CardFooter class="flex flex-col-reverse sm:flex-row justify-between items-center p-4 sm:p-6 bg-slate-50/50 dark:bg-slate-900/50 border-t gap-3 sm:gap-0">
+                 <Button variant="outline" @click="reset" class="w-full sm:w-auto">Import Another</Button>
+                 <Button @click="router.push('/decks')" class="w-full sm:w-auto">View Decks <ArrowRight class="w-4 h-4 ml-2" /></Button>
             </CardFooter>
         </div>
 
