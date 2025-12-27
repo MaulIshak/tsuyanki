@@ -48,8 +48,8 @@ const handleSwitchToRegister = () => {
                <span class="font-semibold text-xl tracking-tight">Tsuyanki</span>
              </div>
              <div class="space-y-1">
-               <h1 class="text-2xl font-semibold tracking-tight">Selamat Datang</h1>
-               <p class="text-sm text-muted-foreground">Masuk untuk melanjutkan progres belajar Anda</p>
+               <h1 class="text-2xl font-semibold tracking-tight">Welcome Back</h1>
+               <p class="text-sm text-muted-foreground">Sign in to continue your learning progress</p>
              </div>
         </div>
 

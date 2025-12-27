@@ -18,7 +18,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const handleLogin = async () => {
   isLoading.value = true
   if (!email.value || !password.value) {
-    toast.error('Gagal Login', { description: 'Email dan password dibutuhkan.' })
+    toast.error('Login Failed', { description: 'Email and password are required.' })
     isLoading.value = false; return
   }
   try {
@@ -30,11 +30,11 @@ const handleLogin = async () => {
     const data = await response.json()
     if (!response.ok) {
        const msg = response.status === 422 ? Object.values(data.errors)[0][0] : data.message
-       throw new Error(msg || 'Login gagal.')
+       throw new Error(msg || 'Login failed.')
     }
     localStorage.setItem('auth_token', data.token)
     localStorage.setItem('user_data', JSON.stringify(data.user))
-    toast.success('Berhasil Masuk', { description: `Selamat datang kembali.` })
+    toast.success('Login Successful', { description: `Welcome back.` })
     emit('auth-success')
   } catch (error) {
     toast.error('Error', { description: error.message })
@@ -49,10 +49,10 @@ const handleLogin = async () => {
   <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-87.5">
     <div class="hidden lg:flex flex-col space-y-2 text-center">
       <h1 class="text-2xl font-semibold tracking-tight">
-        Selamat Datang
+        Welcome Back
       </h1>
       <p class="text-sm text-muted-foreground">
-        Masuk untuk melanjutkan progres belajar Anda di Tsuyanki.
+        Sign in to continue your learning progress on Tsuyanki.
       </p>
     </div>
 
@@ -65,21 +65,21 @@ const handleLogin = async () => {
       <div class="space-y-2">
           <div class="flex items-center justify-between">
             <label for="password" class="text-sm font-medium">Password</label>
-            <a href="#" tabindex="-1" class="text-xs text-primary hover:underline font-medium">Lupa password?</a>
+            <a href="#" tabindex="-1" class="text-xs text-primary hover:underline font-medium">Forgot password?</a>
           </div>
         <Input id="password" v-model="password" type="password" placeholder="••••••••" :disabled="isLoading" required class="h-11" />
       </div>
 
       <Button class="w-full h-11 text-[15px] font-semibold tracking-wide" type="submit" :disabled="isLoading">
         <Loader2 v-if="isLoading" class="w-5 h-5 mr-2 animate-spin" />
-        <span v-else>Masuk Sekarang <ArrowRight class="inline ml-1 w-4 h-4" /></span>
+        <span v-else>Sign In Now <ArrowRight class="inline ml-1 w-4 h-4" /></span>
       </Button>
     </form>
 
     <div class="text-center text-sm text-muted-foreground pt-4">
-      Belum memiliki akun? 
+      Don't have an account? 
       <button @click="$emit('switch-to-register')" class="font-semibold text-primary hover:underline underline-offset-4 transition-colors">
-        Daftar gratis
+        Sign up free
       </button>
     </div>
   </div>

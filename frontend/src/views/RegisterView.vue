@@ -48,8 +48,8 @@ const handleSwitchToLogin = () => {
                <span class="font-semibold text-xl tracking-tight">Tsuyanki</span>
              </div>
              <div class="space-y-1">
-               <h1 class="text-2xl font-semibold tracking-tight">Buat Akun Baru</h1>
-               <p class="text-sm text-muted-foreground">Mulai perjalanan membangun basis pengetahuan Anda</p>
+               <h1 class="text-2xl font-semibold tracking-tight">Create New Account</h1>
+               <p class="text-sm text-muted-foreground">Start your journey to build your knowledge base</p>
              </div>
         </div>
 
