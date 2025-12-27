@@ -25,8 +25,7 @@ class DecksApiTest extends TestCase
                 'data' => [
                     '*' => ['id', 'title', 'description', 'owner_user_id', 'is_public', 'created_at', 'updated_at']
                 ],
-                'links',
-                'meta'
+                'meta' => ['current_page', 'per_page', 'total', 'last_page']
             ]);
     }
 
@@ -81,7 +80,7 @@ class DecksApiTest extends TestCase
 
         $response = $this->getJson('/api/v1/decks/' . $deck->id);
 
-        $response->assertStatus(403);
+        $response->assertStatus(404);
     }
 
     public function test_can_update_deck()

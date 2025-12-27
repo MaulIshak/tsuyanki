@@ -38,6 +38,11 @@ class Deck extends Model
         return $this->hasMany(Deck::class, 'source_deck_id');
     }
 
+    public function notes(): HasMany
+    {
+        return $this->hasMany(Note::class);
+    }
+
     // Placeholder for notes relationship
     // public function notes(): HasMany
     // {

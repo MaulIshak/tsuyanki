@@ -22,5 +22,30 @@ Route::prefix('v1')->group(function () {
         Route::get('card-templates/{cardTemplate}', [\App\Http\Controllers\Api\CardTemplateController::class, 'show']);
         Route::put('card-templates/{cardTemplate}', [\App\Http\Controllers\Api\CardTemplateController::class, 'update']);
         Route::delete('card-templates/{cardTemplate}', [\App\Http\Controllers\Api\CardTemplateController::class, 'destroy']);
+
+        // Notes
+        Route::get('decks/{deck}/notes', [\App\Http\Controllers\Api\NoteController::class, 'index']);
+        Route::post('decks/{deck}/notes', [\App\Http\Controllers\Api\NoteController::class, 'store']);
+        Route::get('notes/{note}', [\App\Http\Controllers\Api\NoteController::class, 'show']);
+        Route::put('notes/{note}', [\App\Http\Controllers\Api\NoteController::class, 'update']);
+        Route::delete('notes/{note}', [\App\Http\Controllers\Api\NoteController::class, 'destroy']);
+        Route::post('notes/{note}/media', [\App\Http\Controllers\Api\NoteController::class, 'attachMedia']);
+        Route::delete('notes/{note}/media/{media}', [\App\Http\Controllers\Api\NoteController::class, 'detachMedia']);
+
+        // Cards
+        Route::get('cards/{card}', [\App\Http\Controllers\Api\CardController::class, 'show']);
+
+        // Review
+        Route::get('review/due', [\App\Http\Controllers\Api\ReviewController::class, 'due']);
+        Route::get('review/stats', [\App\Http\Controllers\Api\ReviewController::class, 'stats']);
+        Route::post('review/{card}', [\App\Http\Controllers\Api\ReviewController::class, 'submit']);
+
+        // Media
+        Route::post('media/upload', [\App\Http\Controllers\Api\MediaController::class, 'upload']);
+        Route::get('media/{media}', [\App\Http\Controllers\Api\MediaController::class, 'show']);
+        Route::delete('media/{media}', [\App\Http\Controllers\Api\MediaController::class, 'destroy']);
+
+        // Tags
+        Route::apiResource('tags', \App\Http\Controllers\Api\TagController::class);
     });
 });

@@ -52,7 +52,7 @@ class DeckController extends Controller
 
         $decks = $query->paginate($request->input('per_page', 20));
 
-        return $decks;
+        return $this->paginateResponse($decks);
     }
 
     /**

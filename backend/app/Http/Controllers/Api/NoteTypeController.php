@@ -21,7 +21,7 @@ class NoteTypeController extends Controller
             ->withCount('cardTemplates as templates_count')
             ->paginate($request->input('per_page', 20));
 
-        return $noteTypes;
+        return $this->paginateResponse($noteTypes);
     }
 
     /**
