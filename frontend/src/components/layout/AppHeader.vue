@@ -15,6 +15,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import AppSidebar from './AppSidebar.vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { inject } from 'vue'
+import { PanelLeftClose, PanelLeftOpen, Sun, Moon } from 'lucide-vue-next'
+import { useDark, useToggle } from '@vueuse/core'
+
+const toggleSidebar = inject('toggleSidebar')
+const isSidebarCollapsed = inject('isSidebarCollapsed')
+
+const isDark = useDark()
+const toggleDark = useToggle(isDark)
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -53,7 +62,7 @@ const handleLogout = async (event) => {
 </script>
 
 <template>
-  <header class="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+  <header class="flex h-14 items-center gap-4 border-b bg-white/80 backdrop-blur-md dark:bg-slate-950/80 dark:border-slate-800 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-50">
     <!-- Mobile Sidebar Trigger -->
     <Sheet>
       <SheetTrigger as-child>
@@ -72,13 +81,23 @@ const handleLogout = async (event) => {
             href="#"
             class="flex items-center gap-2 text-lg font-semibold mb-4"
           >
-            <FolderDot class="h-6 w-6 text-indigo-600" />
-            <span class="text-indigo-900 dark:text-indigo-100">Tsuyanki</span>
+            <img src="/logo.png" alt="Tsuyanki" class="h-8 w-auto dark:brightness-0 dark:invert" />
+            <span class="text-slate-900 dark:text-slate-100">Tsuyanki</span>
           </a>
           <AppSidebar />
         </nav>
       </SheetContent>
     </Sheet>
+
+    <!-- Desktop Sidebar Trigger -->
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      class="hidden md:flex text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+      @click="toggleSidebar"
+    >
+        <component :is="isSidebarCollapsed ?  PanelLeftOpen : PanelLeftClose" class="h-5 w-5" />
+    </Button>
 
     <!-- Desktop Logo / Spacer (if needed) -->
     <div class="w-full flex-1">
@@ -89,6 +108,16 @@ const handleLogout = async (event) => {
         </div>
       </form>
     </div>
+
+    <!-- Theme Toggle -->
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+      @click="toggleDark()"
+    >
+        <component :is="isDark ? Sun : Moon" class="h-5 w-5" />
+    </Button>
 
     <!-- User Menu -->
     <DropdownMenu>

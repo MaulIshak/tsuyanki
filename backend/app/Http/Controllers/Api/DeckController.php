@@ -23,7 +23,7 @@ class DeckController extends Controller
             'search' => 'nullable|string',
         ]);
 
-        $query = Deck::query();
+        $query = Deck::query()->withCount('notes');
 
         // Filter by ownership or public visibility
         $query->where(function ($q) use ($request) {
@@ -50,7 +50,8 @@ class DeckController extends Controller
 
         $query->orderBy($sort, $order);
 
-        $decks = $query->paginate($request->input('per_page', 20));
+        $perPage = $request->input('per_page', $request->input('limit', 6));
+        $decks = $query->paginate($perPage);
 
         return $this->paginateResponse($decks);
     }

@@ -126,12 +126,64 @@ class ReviewController extends Controller
     public function stats(Request $request)
     {
         $user = $request->user();
-        // Simple dummy stats for now or query ReviewLogs
-        $todayReviews = ReviewLog::where('user_id', $user->id)->whereDate('reviewed_at', today())->count();
+
+        // 1. Today's Reviews
+        $todayReviews = ReviewLog::where('user_id', $user->id)
+            ->whereDate('reviewed_at', Carbon::today())
+            ->count();
+
+        // 2. Recent Activity (Last 7 Days)
+        // Group by date
+        $startDate = Carbon::today()->subDays(6);
+        $activityData = ReviewLog::where('user_id', $user->id)
+            ->whereDate('reviewed_at', '>=', $startDate)
+            ->select(DB::raw('DATE(reviewed_at) as date'), DB::raw('count(*) as count'))
+            ->groupBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $recentActivity = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i)->format('Y-m-d');
+            $recentActivity[] = $activityData->get($date)->count ?? 0;
+        }
+
+        // 3. Current Streak
+        // Consecutive days with at least 1 review, looking backwards from today
+        $streak = 0;
+        $checkDate = Carbon::today();
+
+        // Optimize: verify today first
+        $hasReviewedToday = $todayReviews > 0;
+        if ($hasReviewedToday) {
+            $streak++;
+            $checkDate->subDay();
+        } else {
+            // If not reviewed today, check yesterday. If yesterday has reviews, streak is alive (but today is 0 so far)
+            // Actually, usually streak includes today if done, or up to yesterday.
+            // Let's count backwards. 
+            $checkDate->subDay();
+        }
+
+        while (true) {
+            $count = ReviewLog::where('user_id', $user->id)
+                ->whereDate('reviewed_at', $checkDate)
+                ->exists();
+
+            if ($count) {
+                $streak++;
+                $checkDate->subDay();
+            } else {
+                break;
+            }
+        }
 
         return response()->json([
             'period' => 'today',
             'reviews_completed' => $todayReviews,
+            'recent_activity' => $recentActivity,
+            'streak' => $streak,
+            'total_mastery' => 0 // Placeholder, or calc based on Mature cards (interval > 21 days)
         ]);
     }
 }

@@ -25,21 +25,7 @@ const handleSwitchToRegister = () => {
       <!-- Gradient Overlay -->
        <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/50 to-black/30 z-10" />
 
-      <div class="relative z-20 flex items-center text-lg font-medium">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mr-2 h-6 w-6"
-        >
-          <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
-        </svg>
-        Tsuyanki
-      </div>
+        <img src="/logo.png" alt="Tsuyanki" class="h-10 w-auto" />
       <div class="relative z-20 mt-auto">
         <blockquote class="space-y-2">
           <p class="text-lg">

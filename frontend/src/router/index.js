@@ -36,12 +36,32 @@ const router = createRouter({
         {
           path: 'study',
           name: 'study',
-          component: () => import('../views/DashboardView.vue') // Placeholder
+          component: () => import('../views/StudyView.vue') // Placeholder
         },
         {
           path: 'decks',
           name: 'decks',
-          component: () => import('../views/DashboardView.vue') // Placeholder
+          component: () => import('../views/DeckListView.vue')
+        },
+        {
+          path: 'decks/create',
+          name: 'deck-create',
+          component: () => import('../views/DeckCreateView.vue')
+        },
+        {
+          path: 'decks/:id',
+          name: 'deck-detail',
+          component: () => import('../views/DeckDetailView.vue')
+        },
+        {
+          path: 'decks/:deckId/add',
+          name: 'card-add',
+          component: () => import('../views/CardEditorView.vue')
+        },
+        {
+          path: 'cards/:noteId/edit',
+          name: 'card-edit',
+          component: () => import('../views/CardEditorView.vue')
         },
         {
           path: 'import',
@@ -60,7 +80,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('auth_token')
-  
+
   if (to.meta.requiresAuth && !token) {
     next('/login')
   } else if (to.meta.guest && token) {
