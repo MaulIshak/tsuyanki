@@ -23,7 +23,7 @@ const handleSwitchToLogin = () => {
           class="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-700 hover:scale-105"
       />
       <!-- Gradient Overlay -->
-       <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30 z-10" />
+       <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/50 to-black/30 z-10" />
 
       <div class="relative z-20 flex items-center text-lg font-medium">
         <svg
@@ -50,7 +50,7 @@ const handleSwitchToLogin = () => {
       </div>
     </div>
     <div class="lg:p-8">
-      <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+      <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-87.5">
         <RegisterForm 
           @auth-success="handleAuthSuccess"
           @switch-to-login="handleSwitchToLogin"
