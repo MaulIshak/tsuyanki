@@ -16,56 +16,86 @@ class ReviewController extends Controller
     public function due(Request $request)
     {
         $user = $request->user();
-
-        // Get cards due
-        // Logic: cards that belong to decks visible to user (or just user's decks for study? usually user studies his own progress on any deck)
-        // A user studies a card -> creates a review state for THAT user.
-        // So we query ReviewState for this user.
-
-        // However, new cards don't have review state yet.
-        // New cards: Cards in decks user owns/follow that don't have review state.
-
-        // Simplified: Study owned decks or specific deck.
-        // If deck_id provided
-
         $limit = $request->input('limit', 20);
         $deckId = $request->input('deck_id');
 
-        $query = Card::query();
+        // 1. Get Daily Goal from Preferences
+        $dailyGoal = $user->preferences['daily_goal'] ?? 20;
+
+        // 2. Count "True New" Cards introduced today
+        // A "True New" card introduction is defined as a card receiving its FIRST EVER review log today.
+        // This is robust against lapses/relearning logic which generates logs but aren't "introductions".
+        $newCardsIntroducedToday = DB::table('review_logs')
+            ->where('user_id', $user->id)
+            ->select('card_id')
+            ->groupBy('card_id')
+            ->havingRaw('MIN(reviewed_at) >= ?', [Carbon::today()->toDateTimeString()])
+            ->get()
+            ->count();
+
+        $remainingNewLimit = max(0, $dailyGoal - $newCardsIntroducedToday);
+
+        // 3. Query Due Review Cards (Priority 1)
+        // Definition:
+        // - Normal Reviews: repetition > 0
+        // - Lapsed/Relearning: repetition = 0 AND interval > 0 (failed reviews reset rep to 0 but usually keep interval >= 1 or custom logic)
+        //   Note: Import service sets interval=0 for fresh cards.
+        $reviewsQuery = Card::query()
+            ->with(['note.noteType', 'template'])
+            ->whereHas('reviewState', function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                    ->where('due_at', '<=', now())
+                    ->where(function ($sq) {
+                        $sq->where('repetition', '>', 0)
+                            ->orWhere('interval', '>', 0);
+                    });
+            });
 
         if ($deckId) {
-            $query->whereHas('note', function ($q) use ($deckId) {
-                $q->where('deck_id', $deckId);
-            });
+            $reviewsQuery->whereHas('note', fn($q) => $q->where('deck_id', $deckId));
         }
 
-        // Join with ReviewState
-        // We want cards where review_state is null (new) OR review_state.due_at <= now
-        // And user_id = current user
+        $reviews = $reviewsQuery->limit($limit)->get();
 
-        $cards = $query->where(function ($q) use ($user) {
-            $q->whereDoesntHave('reviewState', function ($sq) use ($user) {
-                $sq->where('user_id', $user->id);
-            })
-                ->orWhereHas('reviewState', function ($sq) use ($user) {
-                    $sq->where('user_id', $user->id)
-                        ->where('due_at', '<=', now());
+        // 4. Query True New Cards (Priority 2)
+        // Definition:
+        // - No State (created manually)
+        // - OR State exists but repetition=0 AND interval=0 (Imported fresh cards)
+        $newCards = collect();
+        if ($reviews->count() < $limit && $remainingNewLimit > 0) {
+            $slotsAvailable = $limit - $reviews->count();
+            $fetchCount = min($slotsAvailable, $remainingNewLimit);
+
+            $newQuery = Card::query()
+                ->with(['note.noteType', 'template'])
+                ->where(function ($q) use ($user) {
+                    $q->whereDoesntHave('reviewState', function ($sq) use ($user) {
+                        $sq->where('user_id', $user->id);
+                    })
+                        ->orWhereHas('reviewState', function ($sq) use ($user) {
+                            $sq->where('user_id', $user->id)
+                                ->where('repetition', 0)
+                                ->where('interval', 0);
+                        });
                 });
-        })
-            ->with([
-                'reviewState' => function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                },
-                'note',
-                'template'
-            ])
-            ->limit($limit)
-            ->get();
+
+            if ($deckId) {
+                $newQuery->whereHas('note', fn($q) => $q->where('deck_id', $deckId));
+            }
+
+            $newCards = $newQuery->inRandomOrder()->limit($fetchCount)->get();
+        }
+
+        // 5. Merge
+        $cards = $reviews->merge($newCards);
 
         return response()->json([
             'cards' => $cards,
             'summary' => [
-                'total' => $cards->count()
+                'total' => $cards->count(),
+                'reviews_due' => $reviews->count(),
+                'new_cards' => $newCards->count(),
+                'daily_limit_remaining' => $remainingNewLimit
             ]
         ]);
     }

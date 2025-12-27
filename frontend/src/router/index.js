@@ -71,7 +71,7 @@ const router = createRouter({
         {
           path: 'settings',
           name: 'settings',
-          component: () => import('../views/DashboardView.vue') // Placeholder
+          component: () => import('../views/SettingsView.vue')
         }
       ]
     }
