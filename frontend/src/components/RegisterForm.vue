@@ -52,7 +52,7 @@ const handleRegister = async () => {
 
 <template>
   <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-87.5">
-    <div class="flex flex-col space-y-2 text-center">
+    <div class="hidden lg:flex flex-col space-y-2 text-center">
       <h1 class="text-2xl font-semibold tracking-tight">
         Buat Akun Baru
       </h1>

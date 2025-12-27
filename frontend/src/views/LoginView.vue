@@ -14,7 +14,7 @@ const handleSwitchToRegister = () => {
 </script>
 
 <template>
-  <div class="container relative flex h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+  <div class="container relative flex min-h-screen flex-col items-center md:justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0 py-8 md:py-0">
     <div class="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
       <div class="absolute inset-0 bg-zinc-900" />
       <img
@@ -25,7 +25,11 @@ const handleSwitchToRegister = () => {
       <!-- Gradient Overlay -->
        <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/50 to-black/30 z-10" />
 
-        <img src="/logo.png" alt="Tsuyanki" class="h-10 w-auto" />
+      <!-- Logo + Text (matching sidebar) -->
+      <div class="relative z-20 flex items-center gap-2">
+        <img src="/logo.png" alt="Tsuyanki" class="h-8 w-auto brightness-0 invert" />
+        <span class="font-semibold text-lg text-white tracking-tight">Tsuyanki</span>
+      </div>
       <div class="relative z-20 mt-auto">
         <blockquote class="space-y-2">
           <p class="text-lg">
@@ -37,11 +41,16 @@ const handleSwitchToRegister = () => {
     </div>
     <div class="flex h-full items-center justify-center p-6 lg:p-8">
       <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
-        <!-- Mobile Logo -->
-        <div class="flex flex-col items-center gap-2 text-center lg:hidden">
-             <img src="/logo.png" alt="Tsuyanki" class="h-12 w-auto" />
-             <h1 class="text-2xl font-semibold tracking-tight">Welcome back</h1>
-             <p class="text-sm text-muted-foreground">Enter your credentials to access your account</p>
+        <!-- Mobile Logo + Text -->
+        <div class="flex flex-col items-center gap-3 text-center lg:hidden">
+             <div class="flex items-center gap-2">
+               <img src="/logo.png" alt="Tsuyanki" class="h-10 w-auto" />
+               <span class="font-semibold text-xl tracking-tight">Tsuyanki</span>
+             </div>
+             <div class="space-y-1">
+               <h1 class="text-2xl font-semibold tracking-tight">Selamat Datang</h1>
+               <p class="text-sm text-muted-foreground">Masuk untuk melanjutkan progres belajar Anda</p>
+             </div>
         </div>
 
         <div class="bg-white/50 backdrop-blur-sm dark:bg-slate-900/50 p-6 sm:p-8 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800">

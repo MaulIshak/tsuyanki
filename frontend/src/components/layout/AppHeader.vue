@@ -29,6 +29,51 @@ const router = useRouter()
 const isLoading = ref(false)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
+// User Data State
+import { onMounted, computed } from 'vue'
+import { useFetch } from '@vueuse/core'
+
+const userData = ref(null)
+
+const fetchUser = async () => {
+    const token = localStorage.getItem('auth_token')
+    if (!token) return
+
+    try {
+        const { data } = await useFetch(`${API_BASE_URL}/auth/me`, {
+             headers: { Authorization: `Bearer ${token}` }
+        }).json()
+        
+        if (data.value) {
+            userData.value = data.value
+            // Cache simpler user info if needed
+            localStorage.setItem('user_data', JSON.stringify(data.value))
+        }
+    } catch (e) {
+        console.error("Failed to fetch user", e)
+    }
+}
+
+const userInitials = computed(() => {
+    const name = userData.value?.name || 'User'
+    const parts = name.split(' ')
+    if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase()
+    }
+    return name.slice(0, 2).toUpperCase()
+})
+
+onMounted(() => {
+    // Try to load from local storage first for speed
+    const cached = localStorage.getItem('user_data')
+    if (cached) {
+        try {
+            userData.value = JSON.parse(cached)
+        } catch(e) {}
+    }
+    fetchUser()
+})
+
 const handleLogout = async (event) => {
   event?.preventDefault() // Prevent dropdown closing immediately if needed, though usually fine.
   
@@ -124,15 +169,21 @@ const handleLogout = async (event) => {
       <DropdownMenuTrigger as-child>
         <Button variant="ghost" size="icon" class="rounded-full">
           <Avatar>
-             <!-- Placeholder Avatar -->
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>CN</AvatarFallback>
+             <!-- No image for now, purely initials based as requested -->
+            <AvatarFallback class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 font-bold">
+                {{ userInitials }}
+            </AvatarFallback>
           </Avatar>
           <span class="sr-only">Toggle user menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuContent align="end" class="w-56">
+        <DropdownMenuLabel class="font-normal">
+          <div class="flex flex-col space-y-1">
+            <p class="text-sm font-medium leading-none">{{ userData?.name || 'User' }}</p>
+            <p class="text-xs leading-none text-muted-foreground">{{ userData?.email || 'user@example.com' }}</p>
+          </div>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem @click="router.push('/settings')">Settings</DropdownMenuItem>
         <DropdownMenuItem>Support</DropdownMenuItem>

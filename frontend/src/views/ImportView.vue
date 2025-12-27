@@ -120,9 +120,6 @@ const onUpload = async () => {
     
     <!-- Page Header -->
     <div class="flex items-center gap-4">
-        <Button variant="ghost" size="icon" @click="router.back()">
-            <ArrowLeft class="w-4 h-4" />
-        </Button>
         <div>
             <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Import from Anki</h1>
             <p class="text-slate-500 dark:text-slate-400">Migrate your decks and cards effortlessly.</p>
@@ -151,7 +148,7 @@ const onUpload = async () => {
         
         <!-- Step 1: Upload -->
         <div v-if="currentStep === 0" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <CardHeader>
+            <CardHeader class="mb-2">
                 <CardTitle>Select File</CardTitle>
                 <CardDescription>Upload an .apkg file exported from Anki. This will import notes, cards, and media.</CardDescription>
             </CardHeader>
