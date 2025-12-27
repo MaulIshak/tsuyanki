@@ -1,0 +1,119 @@
+<script setup>
+import { ref } from 'vue'
+import { CircleUser, Menu, FolderDot, Loader2, LogOut } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import AppSidebar from './AppSidebar.vue'
+import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
+
+const router = useRouter()
+const isLoading = ref(false)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+const handleLogout = async (event) => {
+  event?.preventDefault() // Prevent dropdown closing immediately if needed, though usually fine.
+  
+  if (isLoading.value) return
+
+  isLoading.value = true
+  const token = localStorage.getItem('auth_token')
+
+  try {
+    if (token) {
+       await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      })
+    }
+  } catch (error) {
+    console.error("Logout failed", error)
+    // We proceed to clear local state anyway to prevent being stuck
+  } finally {
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user_data')
+    toast.success('Berhasil Logout', { description: 'Sampai jumpa lagi!' })
+    isLoading.value = false
+    router.push('/login')
+  }
+}
+</script>
+
+<template>
+  <header class="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+    <!-- Mobile Sidebar Trigger -->
+    <Sheet>
+      <SheetTrigger as-child>
+        <Button
+          variant="outline"
+          size="icon"
+          class="shrink-0 md:hidden"
+        >
+          <Menu class="h-5 w-5" />
+          <span class="sr-only">Toggle navigation menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" class="flex flex-col">
+        <nav class="grid gap-2 text-lg font-medium">
+          <a
+            href="#"
+            class="flex items-center gap-2 text-lg font-semibold mb-4"
+          >
+            <FolderDot class="h-6 w-6 text-indigo-600" />
+            <span class="text-indigo-900 dark:text-indigo-100">Tsuyanki</span>
+          </a>
+          <AppSidebar />
+        </nav>
+      </SheetContent>
+    </Sheet>
+
+    <!-- Desktop Logo / Spacer (if needed) -->
+    <div class="w-full flex-1">
+      <form v-if="false"> 
+        <!-- Optional Search Bar placeholder -->
+        <div class="relative">
+          
+        </div>
+      </form>
+    </div>
+
+    <!-- User Menu -->
+    <DropdownMenu>
+      <DropdownMenuTrigger as-child>
+        <Button variant="ghost" size="icon" class="rounded-full">
+          <Avatar>
+             <!-- Placeholder Avatar -->
+            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
+          <span class="sr-only">Toggle user menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>Settings</DropdownMenuItem>
+        <DropdownMenuItem>Support</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem @click="handleLogout" class="text-red-600 focus:text-red-600 cursor-pointer">
+          <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
+          <LogOut v-else class="mr-2 h-4 w-4" />
+          Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </header>
+</template>

@@ -46,66 +46,41 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen w-full items-center justify-center bg-zinc-100/70 p-4 dark:bg-zinc-900/50">
-    
-    <Card class="py-0 mx-auto w-full max-w-[900px] overflow-hidden rounded-xl shadow-2xl md:grid md:grid-cols-2 md:min-h-[580px]">
-      
-      <div class="flex h-full flex-col justify-center bg-background p-8 md:p-12 lg:p-14">
-        <div class="mx-auto w-full max-w-[360px] space-y-8">
-          
-          <div class="flex flex-col space-y-2">
-            <h1 class="text-3xl font-bold tracking-tight text-foreground">
-              Selamat Datang
-            </h1>
-            <p class="text-sm text-muted-foreground">
-              Masuk untuk melanjutkan progres belajar Anda di Tsuyanki.
-            </p>
-          </div>
+  <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+    <div class="flex flex-col space-y-2 text-center">
+      <h1 class="text-2xl font-semibold tracking-tight">
+        Selamat Datang
+      </h1>
+      <p class="text-sm text-muted-foreground">
+        Masuk untuk melanjutkan progres belajar Anda di Tsuyanki.
+      </p>
+    </div>
 
-          <form @submit.prevent="handleLogin" class="space-y-5">
-            <div class="space-y-2">
-              <label for="email" class="text-sm font-medium">Email</label>
-              <Input id="email" v-model="email" type="email" placeholder="nama@email.com" :disabled="isLoading" required class="h-11" />
-            </div>
-
-            <div class="space-y-2">
-               <div class="flex items-center justify-between">
-                  <label for="password" class="text-sm font-medium">Password</label>
-                  <a href="#" tabindex="-1" class="text-xs text-primary hover:underline font-medium">Lupa password?</a>
-               </div>
-              <Input id="password" v-model="password" type="password" placeholder="••••••••" :disabled="isLoading" required class="h-11" />
-            </div>
-
-            <Button class="w-full h-11 text-[15px] font-semibold tracking-wide" type="submit" :disabled="isLoading">
-              <Loader2 v-if="isLoading" class="w-5 h-5 mr-2 animate-spin" />
-              <span v-else>Masuk Sekarang <ArrowRight class="inline ml-1 w-4 h-4" /></span>
-            </Button>
-          </form>
-
-          <div class="text-center text-sm text-muted-foreground pt-4">
-            Belum memiliki akun? 
-            <button @click="$emit('switch-to-register')" class="font-semibold text-primary hover:underline underline-offset-4 transition-colors">
-              Daftar gratis
-            </button>
-          </div>
-
-        </div>
+    <form @submit.prevent="handleLogin" class="space-y-5">
+      <div class="space-y-2">
+        <label for="email" class="text-sm font-medium">Email</label>
+        <Input id="email" v-model="email" type="email" placeholder="nama@email.com" :disabled="isLoading" required class="h-11" />
       </div>
 
-      <div class="relative hidden h-full w-full bg-zinc-900 md:block">
-        <img
-          src="/login.png"
-          alt="Tsuyanki Learning"
-          class="absolute inset-0 h-full w-full object-cover opacity-90 transition-transform duration-700 hover:scale-105"
-        />
-        
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10"></div>
-        <div class="absolute bottom-0 left-0 right-0 z-20 p-12 text-white">
-           <h3 class="text-2xl font-bold mb-3 leading-tight">Kuasai Ingatan Anda.</h3>
-           <p class="text-white/90 text-sm leading-relaxed">"Metode spaced repetition Tsuyanki dirancang untuk memindahkan pengetahuan ke memori jangka panjang Anda dengan efisien."</p>
-        </div>
+      <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="password" class="text-sm font-medium">Password</label>
+            <a href="#" tabindex="-1" class="text-xs text-primary hover:underline font-medium">Lupa password?</a>
+          </div>
+        <Input id="password" v-model="password" type="password" placeholder="••••••••" :disabled="isLoading" required class="h-11" />
       </div>
 
-    </Card>
+      <Button class="w-full h-11 text-[15px] font-semibold tracking-wide" type="submit" :disabled="isLoading">
+        <Loader2 v-if="isLoading" class="w-5 h-5 mr-2 animate-spin" />
+        <span v-else>Masuk Sekarang <ArrowRight class="inline ml-1 w-4 h-4" /></span>
+      </Button>
+    </form>
+
+    <div class="text-center text-sm text-muted-foreground pt-4">
+      Belum memiliki akun? 
+      <button @click="$emit('switch-to-register')" class="font-semibold text-primary hover:underline underline-offset-4 transition-colors">
+        Daftar gratis
+      </button>
+    </div>
   </div>
 </template>
