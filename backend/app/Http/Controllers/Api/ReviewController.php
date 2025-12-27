@@ -92,8 +92,35 @@ class ReviewController extends Controller
             $newCards = $newQuery->inRandomOrder()->limit($fetchCount)->get();
         }
 
-        // 5. Merge
-        $cards = $reviews->merge($newCards);
+        // 5. Query Review Ahead (Priority 3 - Cram Mode)
+        // Only if ignore_limits is TRUE and we still have space.
+        $reviewAheadCards = collect();
+        if ($ignoreLimits && ($reviews->count() + $newCards->count()) < $limit) {
+            $slotsAvailable = $limit - ($reviews->count() + $newCards->count());
+
+            // Use robust INNER JOIN for Review Ahead / Cram Mode
+            // This avoids potential subquery issues and ensures only cards with valid state logic are pulled.
+            $aheadQuery = Card::query()
+                ->with(['note.noteType', 'template'])
+                ->join('review_states', 'cards.id', '=', 'review_states.card_id')
+                ->where('review_states.user_id', $user->id)
+                ->where('review_states.due_at', '>', now());
+
+            if ($deckId) {
+                $aheadQuery->whereHas('note', fn($q) => $q->where('deck_id', $deckId));
+            }
+
+            // Get cards reviewed LEAST recently first (Cycling behavior)
+            $reviewAheadCards = $aheadQuery
+                ->select('cards.*') // Ensure we return Card models structure
+                ->orderBy('review_states.last_reviewed_at', 'asc')
+                ->orderBy('review_states.due_at', 'asc')
+                ->limit($slotsAvailable)
+                ->get();
+        }
+
+        // 6. Merge
+        $cards = $reviews->merge($newCards)->merge($reviewAheadCards);
 
         return response()->json([
             'cards' => $cards,

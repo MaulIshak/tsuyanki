@@ -34,6 +34,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 import { toast } from 'vue-sonner'
 
 
@@ -47,6 +56,29 @@ const totalDecks = ref(0)
 const currentPage = ref(1)
 const searchQuery = ref('')
 const isLoading = ref(true)
+
+// Study Dialog State
+const studyDeck = ref(null)
+const studyLimit = ref(20)
+const isStudyOpen = ref(false)
+
+const openStudyDialog = (deck) => {
+    studyDeck.value = deck
+    studyLimit.value = 20
+    isStudyOpen.value = true
+}
+
+const startStudy = () => {
+    if (!studyDeck.value) return
+    isStudyOpen.value = false
+    router.push({
+        path: '/study',
+        query: {
+            deck_id: studyDeck.value.id,
+            limit: studyLimit.value
+        }
+    })
+}
 
 // Fetch Decks
 const fetchDecks = async () => {
@@ -201,7 +233,7 @@ const navigateToDeck = (id) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                  <DropdownMenuItem @click.stop="navigateToDeck(deck.id)">Edit Deck</DropdownMenuItem>
-                 <DropdownMenuItem @click.stop="router.push(`/study?deck_id=${deck.id}`)">Study Now</DropdownMenuItem>
+                 <DropdownMenuItem @click.stop="openStudyDialog(deck)">Study Now</DropdownMenuItem>
                  <DropdownMenuItem @click.stop="openDeleteDialog(deck)" class="text-red-600 focus:text-red-600">Delete</DropdownMenuItem>
               </DropdownMenuContent>
            </DropdownMenu>
@@ -221,7 +253,7 @@ const navigateToDeck = (id) => {
                 <Clock class="w-3 h-3" />
                 <span>Last studied: Never</span>
              </div>
-             <Button size="sm" variant="ghost" class="h-6 text-xs hover:bg-white dark:hover:bg-slate-800" @click.stop="router.push(`/study?deck_id=${deck.id}`)">
+             <Button size="sm" variant="ghost" class="h-6 text-xs hover:bg-white dark:hover:bg-slate-800" @click.stop="openStudyDialog(deck)">
                 Study
              </Button>
         </CardFooter>
@@ -268,6 +300,38 @@ const navigateToDeck = (id) => {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+
+    <Dialog :open="isStudyOpen" @update:open="isStudyOpen = $event">
+      <DialogContent class="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Study "{{ studyDeck?.title }}"</DialogTitle>
+          <DialogDescription>
+            How many cards would you like to review in this session?
+          </DialogDescription>
+        </DialogHeader>
+        <div class="grid gap-4 py-4">
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label for="limit" class="text-right">
+              Cards
+            </Label>
+            <Input
+              id="limit"
+              v-model="studyLimit"
+              type="number"
+              min="1"
+              :max="studyDeck?.notes_count || 100"
+              class="col-span-3"
+            />
+            <p class="col-span-4 text-xs text-slate-500 text-right" v-if="studyDeck">
+                Max available: {{ studyDeck.notes_count }}
+            </p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button @click="startStudy">Start Session</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
   </div>
 </template>

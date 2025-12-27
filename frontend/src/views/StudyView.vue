@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useFetch } from '@vueuse/core'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 const router = useRouter()
+const route = useRoute()
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 // State
@@ -43,11 +44,20 @@ const progressPercentage = computed(() => {
 })
 
 // Fetch Due Cards
-const fetchDueCards = async (force = false, limit = 50) => {
+const fetchDueCards = async (force = false, limit = null) => {
   isLoading.value = true
   const token = localStorage.getItem('auth_token')
-  const query = new URLSearchParams({ limit: limit.toString() })
-  if (force === true) query.append('ignore_limits', '1')
+  
+  // Use provided limit, or query param, or default 20
+  const effectiveLimit = limit || route.query.limit || 20
+  const query = new URLSearchParams({ limit: effectiveLimit.toString() })
+  
+  // If forcing (Review More) OR studying a specific deck (Custom Session), ignore global daily limits
+  if (force === true || route.query.deck_id) {
+      query.append('ignore_limits', '1')
+  }
+
+  if (route.query.deck_id) query.append('deck_id', route.query.deck_id)
   
   try {
     const { data } = await useFetch(`${API_BASE_URL}/review/due?${query.toString()}`, {
@@ -56,9 +66,23 @@ const fetchDueCards = async (force = false, limit = 50) => {
 
     if (data.value) {
       // Handle potential difference between contract (card_id) and actual (id)
-      // Assuming controller returns default model serialization, so 'id'.
-      queue.value = data.value.cards || []
-      sessionStats.value.total = queue.value.length
+      const newCards = data.value.cards || []
+      
+      queue.value = newCards
+      
+      if (force) {
+          // If adding to existing session (Review More)
+          sessionStats.value.total += newCards.length
+      } else {
+          // Initial load
+          sessionStats.value.total = newCards.length
+          sessionStats.value.reviewed = 0
+          sessionStats.value.correct = 0
+      }
+      
+      // Reset index for the new queue chunk
+      currentIndex.value = 0
+      isRevealed.value = false
     }
   } catch (err) {
     toast.error('Failed to load cards', { description: 'Please try again later.' })
@@ -179,13 +203,13 @@ onUnmounted(() => {
          <p class="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-lg">
            You reviewed {{ sessionStats.reviewed }} cards today. Great job keeping up with your streak!
          </p>
-         <div class="flex justify-center gap-4 pt-4">
-             <Button @click="router.push('/dashboard')" size="lg" variant="outline">
+         <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4 px-4 sm:px-0 w-full">
+             <Button @click="router.push('/dashboard')" size="lg" variant="outline" class="w-full sm:w-auto order-2 sm:order-1">
                 Back to Dashboard
              </Button>
              
-             <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-800">
-                <div class="relative w-20">
+             <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-800 w-full sm:w-auto order-1 sm:order-2">
+                <div class="relative w-20 shrink-0">
                     <Input 
                         type="number" 
                         min="1" 
@@ -194,7 +218,7 @@ onUnmounted(() => {
                         class="h-10 border-0 bg-transparent text-center focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                 </div>
-                <Button @click="() => fetchDueCards(true, extraCardsCount)" size="lg">
+                <Button @click="() => fetchDueCards(true, extraCardsCount)" size="lg" class="flex-1 sm:flex-initial">
                    <RotateCcw class="w-4 h-4 mr-2" /> Review More
                 </Button>
              </div>

@@ -171,68 +171,78 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
     <!-- Stats Row Detailed -->
     <div class="grid gap-4 md:grid-cols-3">
       <!-- Cards Due -->
-      <Card class="border-l-4 border-l-rose-500 shadow-sm">
-        <CardHeader class="flex flex-row items-center justify-between pb-2">
-          <CardTitle class="text-sm font-medium text-slate-500">
+      <Card class="border-none shadow-md bg-gradient-to-br from-rose-500 to-pink-600 text-white overflow-hidden relative group">
+        <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500">
+             <Clock class="w-24 h-24" />
+        </div>
+        <CardHeader class="flex flex-row items-center justify-between pb-2 relative z-10">
+          <CardTitle class="text-sm font-medium text-rose-100">
             Reviews Due
           </CardTitle>
-          <div class="h-8 w-8 rounded-full bg-rose-50 flex items-center justify-center">
-            <Clock class="h-4 w-4 text-rose-500" />
+          <div class="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+            <Clock class="h-4 w-4 text-white" />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent class="relative z-10">
           <div v-if="loading">
-             <Skeleton class="h-8 w-20 mb-1" />
+             <Skeleton class="h-8 w-20 mb-1 bg-white/20" />
           </div>
           <div v-else>
-            <div class="text-3xl font-bold text-slate-900 dark:text-slate-50">{{ dueCount }}</div>
-            <p class="text-xs text-rose-500 font-medium mt-1">
-              Needs attention
+            <div class="text-3xl font-bold">{{ dueCount }}</div>
+            <p class="text-xs text-rose-100 font-medium mt-1 flex items-center gap-1">
+              <span v-if="dueCount > 0" class="flex h-2 w-2 rounded-full bg-rose-200 animate-pulse"></span>
+              {{ dueCount > 0 ? 'Action required' : 'All caught up!' }}
             </p>
           </div>
         </CardContent>
       </Card>
 
       <!-- Reviewed Today -->
-      <Card class="border-l-4 border-l-blue-500 shadow-sm">
-        <CardHeader class="flex flex-row items-center justify-between pb-2">
-          <CardTitle class="text-sm font-medium text-slate-500">
+      <Card class="border-none shadow-md bg-gradient-to-br from-blue-500 to-cyan-600 text-white overflow-hidden relative group">
+        <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500">
+             <CheckCircle2 class="w-24 h-24" />
+        </div>
+        <CardHeader class="flex flex-row items-center justify-between pb-2 relative z-10">
+          <CardTitle class="text-sm font-medium text-blue-100">
             Studied Today
           </CardTitle>
-           <div class="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center">
-            <CheckCircle2 class="h-4 w-4 text-blue-500" />
+           <div class="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+            <CheckCircle2 class="h-4 w-4 text-white" />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent class="relative z-10">
            <div v-if="loading">
-             <Skeleton class="h-8 w-20 mb-1" />
+             <Skeleton class="h-8 w-20 mb-1 bg-white/20" />
           </div>
           <div v-else>
-            <div class="text-3xl font-bold text-slate-900 dark:text-slate-50">{{ reviewedToday }}</div>
-            <p class="text-xs text-blue-500 font-medium mt-1">
-              +15% from yesterday
+            <div class="text-3xl font-bold">{{ reviewedToday }}</div>
+            <p class="text-xs text-blue-100 font-medium mt-1">
+               {{ Math.round((reviewedToday / 20) * 100) }}% of daily goal (20)
             </p>
           </div>
         </CardContent>
       </Card>
 
       <!-- Mastery -->
-      <Card class="border-l-4 border-l-amber-500 shadow-sm">
-        <CardHeader class="flex flex-row items-center justify-between pb-2">
-          <CardTitle class="text-sm font-medium text-slate-500">
+      <Card class="border-none shadow-md bg-gradient-to-br from-amber-500 to-orange-600 text-white overflow-hidden relative group">
+        <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500">
+             <Trophy class="w-24 h-24" />
+        </div>
+        <CardHeader class="flex flex-row items-center justify-between pb-2 relative z-10">
+          <CardTitle class="text-sm font-medium text-amber-100">
             Total Mastery
           </CardTitle>
-           <div class="h-8 w-8 rounded-full bg-amber-50 flex items-center justify-center">
-            <Trophy class="h-4 w-4 text-amber-500" />
+           <div class="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+            <Trophy class="h-4 w-4 text-white" />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent class="relative z-10">
            <div v-if="loading">
-             <Skeleton class="h-8 w-20 mb-1" />
+             <Skeleton class="h-8 w-20 mb-1 bg-white/20" />
           </div>
           <div v-else>
-            <div class="text-3xl font-bold text-slate-900 dark:text-slate-50">{{ mastery }}%</div>
-            <p class="text-xs text-amber-500 font-medium mt-1">
+            <div class="text-3xl font-bold">{{ mastery }}%</div>
+            <p class="text-xs text-amber-100 font-medium mt-1">
               Of cards matured
             </p>
           </div>

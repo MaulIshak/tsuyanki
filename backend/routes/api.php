@@ -14,6 +14,7 @@ Route::prefix('v1')->group(function () {
 
         Route::apiResource('decks', \App\Http\Controllers\Api\DeckController::class);
         Route::post('/decks/{deck}/fork', [\App\Http\Controllers\Api\DeckController::class, 'fork']);
+        Route::post('/decks/{deck}/sync', [\App\Http\Controllers\Api\DeckController::class, 'sync']);
 
         Route::apiResource('note-types', \App\Http\Controllers\Api\NoteTypeController::class);
 

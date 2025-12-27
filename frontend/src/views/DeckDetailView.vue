@@ -171,6 +171,27 @@ const updateDeck = async () => {
     }
 }
 
+const isSyncing = ref(false)
+const syncDeck = async () => {
+    isSyncing.value = true
+    const token = localStorage.getItem('auth_token')
+    try {
+        const { data } = await useFetch(`${API_BASE_URL}/decks/${deckId}/sync`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` }
+        }).json()
+        
+        if (data.value) {
+            toast.success(data.value.message)
+            fetchNotes() // Refresh counts
+        }
+    } catch (e) {
+        toast.error('Sync failed')
+    } finally {
+        isSyncing.value = false
+    }
+}
+
 const deleteDeck = async () => {
     if (!confirm('Are you absolutely sure? This will delete all cards in this deck.')) return
     
@@ -449,7 +470,21 @@ const getNoteBack = (note) => {
                      <Skeleton class="h-32 w-full" />
                  </div>
                  
-                 <div class="pt-6 border-t">
+                 <div class="pt-6 border-t space-y-4">
+                      <h3 class="text-lg font-medium">Maintenance</h3>
+                      <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                          <div>
+                              <div class="font-medium text-slate-900 dark:text-slate-100">Sync Cards</div>
+                              <div class="text-sm text-slate-500">Fix missing cards if deck seems empty but has notes.</div>
+                          </div>
+                          <Button variant="outline" @click="syncDeck" :disabled="isSyncing">
+                              <Loader2 v-if="isSyncing" class="w-4 h-4 mr-2 animate-spin" />
+                              Repair & Sync
+                          </Button>
+                      </div>
+                 </div>
+                  
+                  <div class="pt-6 border-t">
                       <h3 class="text-lg font-medium text-red-600">Danger Zone</h3>
                       <p class="text-sm text-slate-500 mb-4">Once you delete a deck, there is no going back.</p>
                       <Button variant="destructive" @click="deleteDeck" :disabled="isDeleting">
