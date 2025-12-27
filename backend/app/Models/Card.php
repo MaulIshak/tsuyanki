@@ -40,29 +40,67 @@ class Card extends Model
 
     public function getFrontHtmlAttribute(): string
     {
+        $html = '';
         if (!$this->relationLoaded('note') || !$this->relationLoaded('template')) {
             if ($this->note && $this->template) {
-                return $this->renderTemplate($this->template->front_template, $this->note->fields);
+                $html = $this->renderTemplate($this->template->front_template, $this->note->fields);
             }
-            return '';
+        } else {
+            $html = $this->renderTemplate($this->template->front_template, $this->note->fields);
         }
 
-        return $this->renderTemplate($this->template->front_template, $this->note->fields);
+        return $this->processMediaTags($html);
     }
 
     public function getBackHtmlAttribute(): string
     {
+        $html = '';
         if (!$this->relationLoaded('note') || !$this->relationLoaded('template')) {
             if ($this->note && $this->template) {
-                return $this->renderTemplate($this->template->back_template, $this->note->fields);
+                $html = $this->renderTemplate($this->template->back_template, $this->note->fields, true);
             }
-            return '';
+        } else {
+            $html = $this->renderTemplate($this->template->back_template, $this->note->fields, true);
         }
 
-        return $this->renderTemplate($this->template->back_template, $this->note->fields);
+        return $this->processMediaTags($html);
     }
 
-    private function renderTemplate(string $template, ?array $fields): string
+    private function processMediaTags(string $html): string
+    {
+        if (empty($html))
+            return '';
+
+        // 1. Audio: [sound:filename.mp3] -> <audio>
+        $html = preg_replace_callback('/\[sound:(.*?)\]/', function ($matches) {
+            $filename = $matches[1];
+            // Use config('app.url') . '/storage/media/' . $filename explicitly or asset function
+            // We use /storage/media/ assuming relative path processing by browser or full URL if needed
+            // For API, returning full URL is safer.
+            $url = asset('storage/media/' . $filename);
+            return '<audio controls src="' . $url . '" class="w-full mt-2"></audio>';
+        }, $html);
+
+        // 2. Images: src="filename.jpg" (no path) -> src="URL/storage/media/filename.jpg"
+        // Match src="..." where value has no slash
+        $html = preg_replace_callback('/(<img\s+[^>]*src=["\'])([^"\'\/]+)(["\'][^>]*>)/i', function ($matches) {
+            $prefix = $matches[1];
+            $filename = $matches[2];
+            $suffix = $matches[3];
+
+            // Skip placeholders or data URIs
+            if (str_starts_with($filename, 'data:') || str_starts_with($filename, 'http')) {
+                return $matches[0];
+            }
+
+            $url = asset('storage/media/' . $filename);
+            return $prefix . $url . $suffix;
+        }, $html);
+
+        return $html;
+    }
+
+    private function renderTemplate(string $template, ?array $fields, bool $revealAnswer = false): string
     {
         if (!$fields)
             return $template;
@@ -108,7 +146,7 @@ class Card extends Model
         } while ($replaced && $iteration < $maxIterations);
 
         // 3. Handle Variable Replacement: {{Field}} and {{filter:Field}}
-        return preg_replace_callback('/\{\{(.*?)\}\}/', function ($matches) use ($fields) {
+        return preg_replace_callback('/\{\{(.*?)\}\}/', function ($matches) use ($fields, $revealAnswer) {
             $rawKey = trim($matches[1]);
 
             // Ignore control tags if any left
@@ -122,6 +160,9 @@ class Card extends Model
             $filter = count($parts) > 1 ? reset($parts) : null;
 
             if ($key === 'FrontSide') {
+                if ($revealAnswer) {
+                    return $this->renderTemplate($this->template->front_template, $fields, true);
+                }
                 return $this->front_html;
             }
 
@@ -132,6 +173,13 @@ class Card extends Model
             }
 
             // Apply filters
+            if ($filter === 'type') {
+                if ($revealAnswer) {
+                    // Return value AND hidden span for frontend comparison
+                    return $value . '<span id="typeans-correct" style="display:none;">' . htmlspecialchars($value) . '</span>';
+                }
+                return '<input type="text" placeholder="Type answer..." class="w-full p-2 border rounded bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700" />';
+            }
             if ($filter === 'furigana') {
                 // Convert "Kanji[Kana]" to ruby tags
                 return preg_replace('/ ?([^ >]+?)\[(.+?)\]/', '<ruby>$1<rt>$2</rt></ruby>', $value);

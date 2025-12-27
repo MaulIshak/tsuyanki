@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'vue-sonner'
-import { Loader2, CheckCircle2, RotateCcw, AlertCircle } from 'lucide-vue-next'
+import { Loader2, CheckCircle2, RotateCcw, AlertCircle, ArrowDown } from 'lucide-vue-next'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,6 +30,9 @@ const sessionStats = ref({
   reviewed: 0,
   correct: 0
 })
+
+const userTypedAnswer = ref(null)
+const correctAnswer = ref(null)
 
 // Current Card Computed
 const currentCard = computed(() => {
@@ -83,6 +86,8 @@ const fetchDueCards = async (force = false, limit = null) => {
       // Reset index for the new queue chunk
       currentIndex.value = 0
       isRevealed.value = false
+      userTypedAnswer.value = null
+      correctAnswer.value = null
     }
   } catch (err) {
     toast.error('Failed to load cards', { description: 'Please try again later.' })
@@ -92,8 +97,28 @@ const fetchDueCards = async (force = false, limit = null) => {
 }
 
 // Reveal Answer
+import { nextTick } from 'vue'
+
 const revealAnswer = () => {
+  // 1. Try to grab input from Front card
+  const inputEl = document.querySelector('input[placeholder="Type answer..."]')
+  if (inputEl) {
+      userTypedAnswer.value = inputEl.value
+  } else {
+      userTypedAnswer.value = null
+  }
+
   isRevealed.value = true
+  
+  // 2. Try to grab hidden correct answer from Back card (after render)
+  nextTick(() => {
+      const hiddenSpan = document.getElementById('typeans-correct')
+      if (hiddenSpan) {
+          correctAnswer.value = hiddenSpan.innerText
+      } else {
+          correctAnswer.value = null
+      }
+  })
 }
 
 // Submit Review (SM-2)
@@ -124,6 +149,8 @@ const submitReview = async (quality) => {
     if (currentIndex.value < queue.value.length - 1) {
       currentIndex.value++
       isRevealed.value = false
+      userTypedAnswer.value = null
+      correctAnswer.value = null
     } else {
       // Session Complete
       queue.value = [] // clear queue to show summary
@@ -245,6 +272,21 @@ onUnmounted(() => {
                <Separator class="flex-1" />
                <span class="text-xs text-slate-400 uppercase">Answer</span>
                <Separator class="flex-1" />
+            </div>
+
+            <!-- Type Answer Comparison -->
+            <div v-if="isRevealed && userTypedAnswer !== null" class="w-full animate-in slide-in-from-bottom-2 duration-300">
+                <div v-if="userTypedAnswer.trim().toLowerCase() === correctAnswer?.trim().toLowerCase()" class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800 text-center font-medium">
+                    <CheckCircle2 class="w-5 h-5 inline-block mr-2 align-text-bottom" />
+                    Correct! ({{ userTypedAnswer }})
+                </div>
+                <div v-else class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 p-3 rounded-lg border border-red-200 dark:border-red-800 text-center flex flex-col gap-1">
+                     <div class="line-through opacity-75 decoration-2">{{ userTypedAnswer || '(Empty)' }}</div>
+                     <div class="font-bold flex items-center justify-center gap-2">
+                        <ArrowDown class="w-4 h-4" />
+                        {{ correctAnswer }}
+                     </div>
+                </div>
             </div>
 
             <!-- Back -->

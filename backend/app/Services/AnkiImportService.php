@@ -117,9 +117,9 @@ class AnkiImportService
     protected function importDecks($ankiDecks)
     {
         foreach ($ankiDecks as $id => $deckData) {
-            // Skip filtered decks (typically dynamic decks in Anki, id starts with something else or dynamic flag)
-            if (isset($deckData['dyn']) && $deckData['dyn'] == 1)
-                continue;
+            // Skip filtered decks check - we want to import them as static decks if user exported them
+            // if (isset($deckData['dyn']) && $deckData['dyn'] == 1)
+            //    continue;
 
             $deck = Deck::create([
                 'title' => $deckData['name'],
