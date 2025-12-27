@@ -133,7 +133,7 @@ List semua deck milik user atau public decks.
 }
 ```
 
-### GET /decks/{deckId}
+### GET /decks/:deckId
 
 Detail deck.
 
@@ -183,7 +183,7 @@ Membuat deck baru.
 }
 ```
 
-### PUT /decks/{deckId}
+### PUT /decks/:deckId
 
 Update deck.
 
@@ -210,7 +210,7 @@ Update deck.
 }
 ```
 
-### DELETE /decks/{deckId}
+### DELETE /decks/:deckId
 
 Hapus deck dan semua notes serta cards di dalamnya.
 
@@ -222,7 +222,7 @@ Hapus deck dan semua notes serta cards di dalamnya.
 }
 ```
 
-### POST /decks/{deckId}/fork
+### POST /decks/:deckId/fork
 
 Fork deck publik.
 
@@ -310,7 +310,7 @@ List semua note types.
 }
 ```
 
-### GET /note-types/{noteTypeId}
+### GET /note-types/:noteTypeId
 
 Detail note type.
 
@@ -422,7 +422,7 @@ Membuat note type.
 }
 ```
 
-### PUT /note-types/{noteTypeId}
+### PUT /note-types/:noteTypeId
 
 Update note type.
 
@@ -472,7 +472,7 @@ Update note type.
 }
 ```
 
-### DELETE /note-types/{noteTypeId}
+### DELETE /note-types/:noteTypeId
 
 Hapus note type (jika tidak ada notes yang menggunakannya).
 
@@ -488,7 +488,7 @@ Hapus note type (jika tidak ada notes yang menggunakannya).
 
 ## 4. Card Templates
 
-### GET /note-types/{noteTypeId}/card-templates
+### GET /note-types/:noteTypeId/card-templates
 
 List card templates untuk note type tertentu.
 
