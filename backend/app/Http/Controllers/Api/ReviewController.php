@@ -74,6 +74,9 @@ class ReviewController extends Controller
 
             $newQuery = Card::query()
                 ->with(['note.noteType', 'template'])
+                ->whereHas('note.deck', function ($q) use ($user) {
+                    $q->where('owner_user_id', $user->id);
+                })
                 ->where(function ($q) use ($user) {
                     $q->whereDoesntHave('reviewState', function ($sq) use ($user) {
                         $sq->where('user_id', $user->id);
