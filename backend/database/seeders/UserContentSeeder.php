@@ -52,7 +52,7 @@ class UserContentSeeder extends Seeder
             ['note_type_id' => $basicType->id, 'name' => 'Standard'],
             [
                 'front_template' => '{{Front}}',
-                'back_template' => '{{FrontSide}}<hr id="answer">{{Back}}',
+                'back_template' => '{{Back}}',
             ]
         );
 
