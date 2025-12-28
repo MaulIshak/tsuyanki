@@ -1,1 +1,0 @@
-import{d as r,A as t,D as o,P as n,u as c,J as l}from"./index-DAVXUDKV.js";const u={__name:"CardDescription",props:{class:{type:null,required:!1}},setup(s){const e=s;return(a,p)=>(t(),r("p",{"data-slot":"card-description",class:n(c(l)("text-muted-foreground text-sm",e.class))},[o(a.$slots,"default")],2))}};export{u as _};

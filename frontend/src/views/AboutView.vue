@@ -29,7 +29,7 @@ import {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 text-slate-800 font-sans">
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
     <!-- Page Header -->
     <header class="bg-indigo-600 text-white py-16 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
       <div class="absolute inset-0 opacity-10 pointer-events-none">
@@ -50,12 +50,12 @@ import {
       
       <!-- Why Tsuyanki Exists -->
       <section class="max-w-3xl mx-auto text-center space-y-6">
-        <h2 class="text-3xl font-bold text-slate-900">Why Tsuyanki?</h2>
-        <p class="text-lg text-slate-600 leading-relaxed">
+        <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100">Why Tsuyanki?</h2>
+        <p class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
           We've all been there: you study hard for an exam or learn a new word, only to forget it a week later.
           Learning once is not enough. The brain naturally discards information it deems unnecessary over time.
         </p>
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 inline-block text-left">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 inline-block text-left">
           <p class="text-lg text-indigo-700 font-medium italic">
             "Tsuyanki helps you review material at the right time, before you forget it."
           </p>
@@ -67,8 +67,8 @@ import {
       <!-- What Is Spaced Repetition? -->
       <section class="space-y-8">
         <div class="text-center space-y-2">
-          <h2 class="text-3xl font-bold text-slate-900">What Is Spaced Repetition?</h2>
-          <p class="text-slate-600 max-w-2xl mx-auto">
+          <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100">What Is Spaced Repetition?</h2>
+          <p class="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
             It's a study technique that schedules reviews at increasing intervals. Instead of cramming, you review just as you're about to forget.
           </p>
         </div>
@@ -79,21 +79,21 @@ import {
               <BookOpen class="w-8 h-8" />
             </div>
             <h3 class="font-semibold text-lg">1. Learn</h3>
-            <p class="text-slate-600 text-sm">You encounter a new concept or word for the first time.</p>
+            <p class="text-slate-600 dark:text-slate-300 text-sm">You encounter a new concept or word for the first time.</p>
           </div>
           <div class="flex flex-col items-center text-center space-y-4 p-4">
             <div class="bg-indigo-100 p-4 rounded-full text-indigo-600">
               <Clock class="w-8 h-8" />
             </div>
             <h3 class="font-semibold text-lg">2. Wait</h3>
-            <p class="text-slate-600 text-sm">Time passes. The memory begins to fade naturally.</p>
+            <p class="text-slate-600 dark:text-slate-300 text-sm">Time passes. The memory begins to fade naturally.</p>
           </div>
           <div class="flex flex-col items-center text-center space-y-4 p-4">
             <div class="bg-indigo-100 p-4 rounded-full text-indigo-600">
               <Repeat class="w-8 h-8" />
             </div>
             <h3 class="font-semibold text-lg">3. Recall</h3>
-            <p class="text-slate-600 text-sm">Tsuyanki reminds you to review just before you forget, strengthening the memory.</p>
+            <p class="text-slate-600 dark:text-slate-300 text-sm">Tsuyanki reminds you to review just before you forget, strengthening the memory.</p>
           </div>
         </div>
       </section>
@@ -103,8 +103,8 @@ import {
       <!-- How Tsuyanki Works (Core Concepts) -->
       <section class="space-y-10">
         <div class="text-center space-y-2">
-          <h2 class="text-3xl font-bold text-slate-900">How Tsuyanki Works</h2>
-          <p class="text-slate-600">Understanding the core building blocks.</p>
+          <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100">How Tsuyanki Works</h2>
+          <p class="text-slate-600 dark:text-slate-400">Understanding the core building blocks.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -119,7 +119,7 @@ import {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p class="text-slate-600 text-sm">A collection of related topics (e.g., "Japanese N5 Vocabulary").</p>
+                <p class="text-slate-600 dark:text-slate-400 text-sm">A collection of related topics (e.g., "Japanese N5 Vocabulary").</p>
               </CardContent>
             </Card>
 
@@ -131,7 +131,7 @@ import {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p class="text-slate-600 text-sm">One piece of knowledge (e.g., The word "Neko" / "Cat").</p>
+                <p class="text-slate-600 dark:text-slate-400 text-sm">One piece of knowledge (e.g., The word "Neko" / "Cat").</p>
               </CardContent>
             </Card>
 
@@ -143,26 +143,26 @@ import {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p class="text-slate-600 text-sm">A question generated from a note (e.g., Front: "Neko", Back: "Cat").</p>
+                <p class="text-slate-600 dark:text-slate-400 text-sm">A question generated from a note (e.g., Front: "Neko", Back: "Cat").</p>
               </CardContent>
             </Card>
           </div>
 
           <!-- Diagram -->
-          <div class="bg-indigo-50 p-8 rounded-xl border border-indigo-100 flex flex-col items-center justify-center space-y-4">
-             <div class="font-semibold text-indigo-900 mb-2">The Flow</div>
+          <div class="bg-indigo-50 dark:bg-indigo-950/30 p-8 rounded-xl border border-indigo-100 dark:border-indigo-900/50 flex flex-col items-center justify-center space-y-4">
+             <div class="font-semibold text-indigo-900 dark:text-indigo-200 mb-2">The Flow</div>
              
              <div class="flex flex-col items-center gap-2">
-                <div class="bg-white px-6 py-3 rounded-lg shadow-sm border border-indigo-200 text-indigo-800 font-medium">Note</div>
-                <div class="h-6 w-0.5 bg-indigo-300"></div>
-                <div class="bg-white px-6 py-3 rounded-lg shadow-sm border border-indigo-200 text-indigo-800 font-medium">Card</div>
+                <div class="bg-white dark:bg-slate-900 px-6 py-3 rounded-lg shadow-sm border border-indigo-200 dark:border-indigo-800 text-indigo-800 dark:text-indigo-200 font-medium">Note</div>
+                <div class="h-6 w-0.5 bg-indigo-300 dark:bg-indigo-700"></div>
+                <div class="bg-white dark:bg-slate-900 px-6 py-3 rounded-lg shadow-sm border border-indigo-200 dark:border-indigo-800 text-indigo-800 dark:text-indigo-200 font-medium">Card</div>
                 <div class="h-6 w-0.5 bg-indigo-300"></div>
                 <div class="bg-indigo-600 px-6 py-3 rounded-lg shadow-md text-white font-bold flex items-center gap-2">
                   <Repeat class="w-4 h-4" /> Review
                 </div>
              </div>
              
-             <p class="text-xs text-center text-indigo-600 mt-4 max-w-xs">
+             <p class="text-xs text-center text-indigo-600 dark:text-indigo-400 mt-4 max-w-xs">
                 You create a note, it becomes a card, and Tsuyanki schedules it for daily review.
              </p>
           </div>
@@ -172,22 +172,22 @@ import {
 
       <!-- What Happens During a Review Session -->
       <section class="max-w-3xl mx-auto space-y-6">
-        <h2 class="text-3xl font-bold text-slate-900 text-center">Your Daily Review Session</h2>
+        <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 text-center">Your Daily Review Session</h2>
         
-        <p class="text-slate-600 text-center">
+        <p class="text-slate-600 dark:text-slate-400 text-center">
             When you open Tsuyanki, your goals are simple. Here is what happens:
         </p>
 
-        <Accordion type="single" collapsible class="w-full bg-white rounded-lg border border-slate-200 px-4">
+        <Accordion type="single" collapsible class="w-full bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 px-4">
             <AccordionItem value="item-1">
-              <AccordionTrigger>1. Tsuyanki selects cards due for review</AccordionTrigger>
-              <AccordionContent class="text-slate-600">
+              <AccordionTrigger class="dark:text-slate-200">1. Tsuyanki selects cards due for review</AccordionTrigger>
+              <AccordionContent class="text-slate-600 dark:text-slate-400">
                 You don't need to decide what to study. The app calculates which cards you are at risk of forgetting and shows them to you.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
-              <AccordionTrigger>2. You answer and rate difficulty</AccordionTrigger>
-              <AccordionContent class="text-slate-600 space-y-2">
+              <AccordionTrigger class="dark:text-slate-200">2. You answer and rate difficulty</AccordionTrigger>
+              <AccordionContent class="text-slate-600 dark:text-slate-400 space-y-2">
                 <p>After seeing the answer, you tell Tsuyanki how hard it was named:</p>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs font-semibold mt-2">
                     <span class="bg-red-100 text-red-700 py-1 rounded">Again</span>
@@ -198,8 +198,8 @@ import {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-              <AccordionTrigger>3. Connect for long-term memory</AccordionTrigger>
-              <AccordionContent class="text-slate-600">
+              <AccordionTrigger class="dark:text-slate-200">3. Connect for long-term memory</AccordionTrigger>
+              <AccordionContent class="text-slate-600 dark:text-slate-400">
                 Based on your rating, Tsuyanki schedules the next review. Easier cards are shown less often, while harder ones appear sooner.
               </AccordionContent>
             </AccordionItem>
@@ -210,49 +210,49 @@ import {
       <section class="grid grid-cols-1 md:grid-cols-2 gap-12">
           
           <div class="space-y-6">
-              <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                  <Zap class="w-6 h-6 text-indigo-600" /> Key Benefits
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Zap class="w-6 h-6 text-indigo-600 dark:text-indigo-400" /> Key Benefits
               </h2>
               <ul class="space-y-3">
                   <li class="flex items-start gap-3">
                       <CalendarCheck class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
-                      <span class="text-slate-700"><strong>No manual scheduling:</strong> Just open the app and review what's due.</span>
+                      <span class="text-slate-700 dark:text-slate-300"><strong>No manual scheduling:</strong> Just open the app and review what's due.</span>
                   </li>
                   <li class="flex items-start gap-3">
                       <Layout class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
-                      <span class="text-slate-700"><strong>Daily manageable workload:</strong> Short, focused sessions are better than infrequent binges.</span>
+                      <span class="text-slate-700 dark:text-slate-300"><strong>Daily manageable workload:</strong> Short, focused sessions are better than infrequent binges.</span>
                   </li>
                   <li class="flex items-start gap-3">
                       <Brain class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
-                      <span class="text-slate-700"><strong>Long-term focus:</strong> Optimized for retaining knowledge for years, not days.</span>
+                      <span class="text-slate-700 dark:text-slate-300"><strong>Long-term focus:</strong> Optimized for retaining knowledge for years, not days.</span>
                   </li>
                   <li class="flex items-start gap-3">
                       <Layers class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
-                      <span class="text-slate-700"><strong>Anki Compatible:</strong> Import your existing decks easily.</span>
+                      <span class="text-slate-700 dark:text-slate-300"><strong>Anki Compatible:</strong> Import your existing decks easily.</span>
                   </li>
               </ul>
           </div>
 
           <div class="space-y-6">
-            <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                <UsersIcon class="w-6 h-6 text-indigo-600" /> Who is Tsuyanki For?
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <UsersIcon class="w-6 h-6 text-indigo-600 dark:text-indigo-400" /> Who is Tsuyanki For?
             </h2>
             <div class="space-y-4">
-                <Alert class="bg-indigo-50 border-indigo-100">
-                    <AlertTitle class="text-indigo-800 font-semibold">Language Learners</AlertTitle>
-                    <AlertDescription class="text-indigo-700/80">
+                <Alert class="bg-indigo-50 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/50">
+                    <AlertTitle class="text-indigo-800 dark:text-indigo-200 font-semibold">Language Learners</AlertTitle>
+                    <AlertDescription class="text-indigo-700/80 dark:text-indigo-300/80">
                         Perfect for vocabulary, kanji, or phrase memorization.
                     </AlertDescription>
                 </Alert>
-                <Alert class="bg-slate-50 border-slate-200">
-                    <AlertTitle class="text-slate-800 font-semibold">Students</AlertTitle>
-                    <AlertDescription class="text-slate-600">
+                <Alert class="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                    <AlertTitle class="text-slate-800 dark:text-slate-200 font-semibold">Students</AlertTitle>
+                    <AlertDescription class="text-slate-600 dark:text-slate-400">
                         Ace your exams by retaining facts, formulas, and definitions.
                     </AlertDescription>
                 </Alert>
-                <Alert class="bg-slate-50 border-slate-200">
-                    <AlertTitle class="text-slate-800 font-semibold">Lifelong Learners</AlertTitle>
-                    <AlertDescription class="text-slate-600">
+                <Alert class="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                    <AlertTitle class="text-slate-800 dark:text-slate-200 font-semibold">Lifelong Learners</AlertTitle>
+                    <AlertDescription class="text-slate-600 dark:text-slate-400">
                         Anyone who wants to keep their knowledge sharp without the stress.
                     </AlertDescription>
                 </Alert>
@@ -262,7 +262,7 @@ import {
       </section>
 
       <!-- Footer -->
-      <footer class="text-center text-slate-500 text-sm py-8 border-t border-slate-200 mt-12">
+      <footer class="text-center text-slate-500 dark:text-slate-400 text-sm py-8 border-t border-slate-200 dark:border-slate-800 mt-12">
         <p>Created by MaulIshak</p>
       </footer>
 
