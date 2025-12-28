@@ -39,7 +39,12 @@ const handleSwitchToRegister = () => {
         </blockquote>
       </div>
     </div>
-    <div class="flex h-full items-center justify-center p-6 lg:p-8">
+    <div class="flex h-full items-center justify-center p-6 lg:p-8 relative">
+      <div class="absolute right-4 top-4 md:right-8 md:top-8">
+        <RouterLink to="/about" class="text-sm font-medium text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+          About
+        </RouterLink>
+      </div>
       <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
         <!-- Mobile Logo + Text -->
         <div class="flex flex-col items-center gap-3 text-center lg:hidden">

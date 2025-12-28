@@ -3,6 +3,7 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import AppLayout from '../layouts/AppLayout.vue'
 import DashboardView from '../views/DashboardView.vue'
+import AboutView from '../views/AboutView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,6 +19,11 @@ const router = createRouter({
       name: 'register',
       component: RegisterView,
       meta: { guest: true }
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: AboutView
     },
     {
       path: '/',
@@ -72,6 +78,11 @@ const router = createRouter({
           path: 'settings',
           name: 'settings',
           component: () => import('../views/SettingsView.vue')
+        },
+        {
+          path: 'info',
+          name: 'info',
+          component: AboutView
         }
       ]
     }

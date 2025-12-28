@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { Home, BookOpen, Layers, Upload, Settings } from 'lucide-vue-next'
+import { Home, BookOpen, Layers, Upload, Settings, Info } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -21,6 +21,7 @@ const navigation = [
   { name: 'Study', href: '/study', icon: BookOpen },
   { name: 'Decks', href: '/decks', icon: Layers },
   { name: 'Import', href: '/import', icon: Upload },
+  { name: 'About Tsuyanki', href: '/info', icon: Info },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
