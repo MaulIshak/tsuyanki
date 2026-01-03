@@ -3,12 +3,18 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import AppLayout from '../layouts/AppLayout.vue'
 import DashboardView from '../views/DashboardView.vue'
-import AboutView from '../views/AboutView.vue'
 import AuthCallbackView from '../views/AuthCallbackView.vue'
+import LandingView from '../views/LandingView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/',
+      name: 'landing',
+      component: LandingView,
+      meta: { guest: true }
+    },
     {
       path: '/auth/callback',
       name: 'auth-callback',
@@ -27,20 +33,13 @@ const router = createRouter({
       component: RegisterView,
       meta: { guest: true }
     },
-    {
-      path: '/about',
-      name: 'about',
-      component: AboutView
-    },
+
     {
       path: '/',
       component: AppLayout,
       meta: { requiresAuth: true },
       children: [
-        {
-          path: '',
-          redirect: '/dashboard'
-        },
+
         {
           path: 'dashboard',
           name: 'dashboard',
@@ -86,11 +85,7 @@ const router = createRouter({
           name: 'settings',
           component: () => import('../views/SettingsView.vue')
         },
-        {
-          path: 'info',
-          name: 'info',
-          component: AboutView
-        }
+
       ]
     }
   ]
