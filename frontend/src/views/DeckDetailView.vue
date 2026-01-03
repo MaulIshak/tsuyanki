@@ -44,6 +44,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { toast } from 'vue-sonner'
+import { deserializeContent } from '@/lib/mediaUtils'
 
 const router = useRouter()
 const route = useRoute()
@@ -243,18 +244,18 @@ const getNoteFront = (note) => {
 
     // Check priorities
     for (const key of priorityKeys) {
-        if (lowerMap[key]) return { label: lowerMap[key], content: note.fields[lowerMap[key]] }
+        if (lowerMap[key]) return { label: lowerMap[key], content: deserializeContent(note.fields[lowerMap[key]]) }
     }
     
     // Fallback: Find first field that is NOT in exclude list and has content
     for (const key of keys) {
         if (!excludeKeys.includes(key.toLowerCase())) {
-            return { label: key, content: note.fields[key] }
+            return { label: key, content: deserializeContent(note.fields[key]) }
         }
     }
     
     const firstKey = keys[0]
-    return { label: firstKey || 'Front', content: note.fields[firstKey] || 'N/A' }
+    return { label: firstKey || 'Front', content: deserializeContent(note.fields[firstKey] || 'N/A') }
 }
 
 const getNoteBack = (note) => {
@@ -269,13 +270,13 @@ const getNoteBack = (note) => {
     }, {})
 
     for (const key of priorityKeys) {
-        if (lowerMap[key]) return { label: lowerMap[key], content: note.fields[lowerMap[key]] }
+        if (lowerMap[key]) return { label: lowerMap[key], content: deserializeContent(note.fields[lowerMap[key]]) }
     }
 
     // Fallback: Second non-excluded field?
     const validKeys = keys.filter(k => !excludeKeys.includes(k.toLowerCase()))
     if (validKeys.length > 1) {
-        return { label: validKeys[1], content: note.fields[validKeys[1]] }
+        return { label: validKeys[1], content: deserializeContent(note.fields[validKeys[1]]) }
     }
 
     return { label: 'Back', content: '' }

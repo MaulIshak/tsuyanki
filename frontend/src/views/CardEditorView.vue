@@ -3,9 +3,10 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useFetch } from '@vueuse/core'
 import { ArrowLeft, Save, Loader2, Plus } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import RichTextEditor from '@/components/RichTextEditor.vue'
 import {
   Select,
   SelectContent,
@@ -14,7 +15,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
-import { toast } from 'vue-sonner'
+import { parseMedia, resolveMediaUrl, deserializeContent, serializeContent } from '@/lib/mediaUtils'
+import { Paperclip, Image as ImageIcon, Music } from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
@@ -29,6 +31,10 @@ const fields = ref({})
 const tags = ref('')
 const isLoading = ref(false)
 const isSubmitting = ref(false)
+const fieldEditors = ref({}) // Refs to editors
+const isUploading = ref(false)
+const fileInput = ref(null)
+const activeUploadField = ref(null)
 
 // Computed
 const activeFields = computed(() => {
@@ -49,6 +55,7 @@ const fetchNoteTypes = async () => {
             noteTypes.value = data.value.data
             // Select default if available and not editing
             if (!noteId && noteTypes.value.length > 0) {
+                 // Try to pick basic or first
                  const basic = noteTypes.value.find(t => t.name.toLowerCase().includes('basic'))
                  selectedNoteTypeId.value = basic ? basic.id : noteTypes.value[0].id
             }
@@ -72,11 +79,18 @@ const fetchNote = async () => {
         if (data.value) {
              const note = data.value
              selectedNoteTypeId.value = note.note_type_id
-             fields.value = { ...note.fields } // Clone fields
-             // Tags handling if needed
-             if (note.tags && Array.isArray(note.tags)) {
-                 // Format tags if they come as array of objects or strings. 
-                 // Assuming simple array of strings or logic needed later.
+             // Deserialize fields
+             const rawFields = { ...note.fields }
+             for (const key in rawFields) {
+                 fields.value[key] = deserializeContent(rawFields[key])
+             }
+             
+             // Ensure note type exists
+             if (note.note_type) {
+                const typeExists = noteTypes.value.some(t => t.id === note.note_type.id)
+                if (!typeExists) {
+                    noteTypes.value.push(note.note_type)
+                }
              }
         }
     } catch (e) {
@@ -87,7 +101,7 @@ const fetchNote = async () => {
 }
 
 const onSubmit = async () => {
-    // Basic validation: ensure at least one field is filled or check required fields
+    // Basic validation
     const filledCount = Object.values(fields.value).filter(v => v && v.trim()).length
     if (filledCount === 0) {
         toast.error('Please fill in at least one field')
@@ -108,9 +122,15 @@ const onSubmit = async () => {
              method = 'POST'
         }
 
+        // Serialize fields
+        const serializedFields = {}
+        for (const key in fields.value) {
+            serializedFields[key] = serializeContent(fields.value[key])
+        }
+
         const payload = {
              note_type_id: selectedNoteTypeId.value,
-             fields: fields.value,
+             fields: serializedFields,
              tags: tags.value ? tags.value.split(',').map(t => t.trim()).filter(Boolean) : []
         }
 
@@ -141,6 +161,65 @@ const onSubmit = async () => {
     } finally {
         isSubmitting.value = false
     }
+}
+
+const handleEditorUploadRequest = (fieldName) => {
+    // Current approach: trigger hidden input, but using Editor's insert command after upload
+    activeUploadField.value = fieldName
+    fileInput.value.click()
+}
+
+const onFileSelected = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    isUploading.value = true
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+        const token = localStorage.getItem('auth_token')
+        const { data, error } = await useFetch(`${API_BASE_URL}/media/upload`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData
+        }).json()
+
+        if (error.value) throw new Error(error.value)
+
+        const media = data.value
+        // Resolve URL 
+        // We know resolveMediaUrl uses VITE_API_BASE_URL logic but here we have the media object.
+        // Usually, editor expects the full URL for src.
+        // We can use resolveMediaUrl(media.storage_key)
+        
+        const fullUrl = resolveMediaUrl(media.storage_key)
+        
+        const editorInstance = fieldEditors.value[activeUploadField.value]
+        
+        if (editorInstance) {
+             let type = 'image'
+             if (file.type.startsWith('audio/')) type = 'audio'
+             else if (file.type.startsWith('video/')) type = 'video'
+             
+             editorInstance.insertMedia(type, fullUrl)
+             toast.success('Media uploaded')
+        }
+        
+    } catch (e) {
+        console.error(e)
+        // toast.error('Failed to upload media')
+    } finally {
+        isUploading.value = false
+        if (fileInput.value) fileInput.value.value = '' 
+    }
+}
+// Rethinking Upload:
+// RichTextEditor has its own "Insert Media" button causing an emit.
+// We should listen to that emit.
+
+const getFieldMedia = (content) => {
+    return parseMedia(content)
 }
 
 onMounted(() => {
@@ -181,13 +260,13 @@ onMounted(() => {
 
             <!-- Dynamic Fields -->
             <div class="space-y-4" v-if="activeFields.length > 0">
-                 <div v-for="field in activeFields" :key="field.name" class="space-y-2">
+                 <div v-for="(field, idx) in activeFields" :key="field.name" class="space-y-2">
                     <label class="text-sm font-medium">{{ field.name }}</label>
-                    <Textarea 
-                        v-model="fields[field.name]" 
-                        :placeholder="`${field.name} content...`" 
-                        class="resize-none font-medium"
-                        :class="field.name.toLowerCase().includes('expression') || field.name.toLowerCase().includes('front') ? 'h-24 text-lg' : 'h-16'" 
+                    <RichTextEditor
+                        :ref="(el) => { if (el) fieldEditors[field.name] = el }"
+                        v-model="fields[field.name]"
+                        :placeholder="`${field.name} content...`"
+                        @on-media-upload="handleEditorUploadRequest(field.name)"
                     />
                  </div>
             </div>
@@ -218,4 +297,7 @@ onMounted(() => {
         </CardFooter>
     </Card>
   </div>
+
+  <!-- Hidden File Input -->
+  <input type="file" ref="fileInput" class="hidden" accept="audio/*,image/*" @change="onFileSelected" />
 </template>

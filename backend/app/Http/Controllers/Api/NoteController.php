@@ -100,7 +100,7 @@ class NoteController extends Controller
     {
         Gate::authorize('view', $note->deck);
 
-        $note->load(['cards', 'media', 'tags']);
+        $note->load(['cards', 'media', 'tags', 'noteType']);
 
         return response()->json($note);
     }
