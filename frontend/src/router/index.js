@@ -4,10 +4,17 @@ import RegisterView from '../views/RegisterView.vue'
 import AppLayout from '../layouts/AppLayout.vue'
 import DashboardView from '../views/DashboardView.vue'
 import AboutView from '../views/AboutView.vue'
+import AuthCallbackView from '../views/AuthCallbackView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/auth/callback',
+      name: 'auth-callback',
+      component: AuthCallbackView,
+      meta: { guest: true }
+    },
     {
       path: '/login',
       name: 'login',

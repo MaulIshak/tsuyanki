@@ -6,15 +6,59 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Nette\Utils\Json;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+    public function redirectToGoogle()
+    {
+        return \Laravel\Socialite\Facades\Socialite::driver('google')->stateless()->redirect();
+    }
+
+    public function handleGoogleCallback(): RedirectResponse|JsonResponse
+    {
+        try {
+            // Stateless is important for API/SPA usage
+            $driver = \Laravel\Socialite\Facades\Socialite::driver('google');
+            // Disable SSL verification for local development (fixes cURL error 60)
+            $driver->setHttpClient(new \GuzzleHttp\Client(['verify' => false]));
+            $googleUser = $driver->stateless()->user();
+
+            $user = User::updateOrCreate(
+                [
+                    'email' => $googleUser->getEmail(),
+                ],
+                [
+                    'name' => $googleUser->getName(),
+                    'google_id' => $googleUser->getId(),
+                    'avatar' => $googleUser->getAvatar(),
+                ]
+            );
+
+            if (!$user->password) {
+                // Optionally set a random password if it's null
+            }
+
+            $token = $user->createToken('API Token')->plainTextToken;
+
+            // Redirect to frontend with token
+            // TODO: Use env('FRONTEND_URL')
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+
+            return redirect("{$frontendUrl}/auth/callback?token={$token}");
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Google Login Error: ' . $e->getMessage());
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+            return redirect("{$frontendUrl}/login?error=google_auth_failed&message=" . urlencode($e->getMessage()));
+        }
+    }
     public function register(Request $request): JsonResponse
     {
         $request->validate([
