@@ -49,9 +49,7 @@ provide('isSidebarCollapsed', isSidebarCollapsed)
       <main class="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth">
         <div class="max-w-7xl mx-auto w-full ease-in-out duration-500">
           <RouterView v-slot="{ Component }">
-             <transition name="fade" mode="out-in">
-                <component :is="Component" />
-             </transition>
+            <component :is="Component" />
           </RouterView>
         </div>
       </main>
@@ -60,13 +58,13 @@ provide('isSidebarCollapsed', isSidebarCollapsed)
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.3s ease;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.page-fade-enter-from,
+.page-fade-leave-to {
   opacity: 0;
 }
 </style>
