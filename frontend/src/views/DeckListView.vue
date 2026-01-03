@@ -215,23 +215,23 @@ const navigateToDeck = (id) => {
       <Card 
         v-for="deck in decks" 
         :key="deck.id" 
-        class="group hover:border-indigo-400 dark:hover:border-indigo-500 transition-colors cursor-pointer flex flex-col"
+        class="group bg-white/90 dark:bg-slate-900/40 backdrop-blur-sm border-slate-200/60 dark:border-slate-800/60 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300 cursor-pointer flex flex-col hover:shadow-lg hover:-translate-y-1"
         @click="navigateToDeck(deck.id)"
       >
-        <CardHeader class="flex flex-row items-start justify-between space-y-0 ">
+        <CardHeader class="flex flex-row items-start justify-between space-y-0 pb-2">
            <div class="space-y-1 pr-4">
-              <CardTitle class="text-base line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ deck.title }}</CardTitle>
-              <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 min-h-[2.5em]">
+              <CardTitle class="text-lg font-bold line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ deck.title }}</CardTitle>
+              <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 min-h-[2.5em] leading-relaxed">
                 {{ deck.description || 'No description provided.' }}
               </p>
            </div>
            <DropdownMenu>
               <DropdownMenuTrigger as-child>
-                 <Button variant="ghost" size="icon" class="-mt-1 -mr-2 h-6 w-6 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300" @click.stop>
+                 <Button variant="ghost" size="icon" class="-mt-1 -mr-2 h-8 w-8 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" @click.stop>
                     <MoreHorizontal class="w-4 h-4" />
                  </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" class="w-48">
                  <DropdownMenuItem @click.stop="navigateToDeck(deck.id)">Edit Deck</DropdownMenuItem>
                  <DropdownMenuItem @click.stop="openStudyDialog(deck)">Study Now</DropdownMenuItem>
                  <DropdownMenuItem @click.stop="openDeleteDialog(deck)" class="text-red-600 focus:text-red-600">Delete</DropdownMenuItem>
@@ -240,20 +240,20 @@ const navigateToDeck = (id) => {
         </CardHeader>
         
         <CardContent class="flex-1 p-4 pt-2">
-           <div class="flex items-center justify-between text-sm">
-              <div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-                 <Layers class="w-4 h-4" />
-                 <span>{{ deck.notes_count || 0 }} notes</span>
-              </div>
+           <div class="flex items-center justify-between mt-auto">
+              <Badge variant="secondary" class="font-normal bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 hover:bg-indigo-100 transition-colors">
+                 <Layers class="w-3 h-3 mr-1" />
+                 {{ deck.notes_count || 0 }} cards
+              </Badge>
            </div>
         </CardContent>
 
-        <CardFooter class="border-t bg-slate-50/50 dark:bg-slate-900/30  text-xs text-slate-500 dark:text-slate-400 flex justify-between items-center">
-             <div class="flex items-center gap-1">
+        <CardFooter class="border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/20 p-4 text-xs text-slate-500 dark:text-slate-400 flex justify-between items-center">
+             <div class="flex items-center gap-1.5 opacity-80">
                 <Clock class="w-3 h-3" />
-                <span>Last studied: Never</span>
+                <span>Last: Never</span>
              </div>
-             <Button size="sm" variant="ghost" class="h-6 text-xs hover:bg-white dark:hover:bg-slate-800" @click.stop="openStudyDialog(deck)">
+             <Button size="sm" class="h-7 text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:hover:bg-indigo-800 dark:text-indigo-200 border-0 transition-colors shadow-sm" @click.stop="openStudyDialog(deck)">
                 Study
              </Button>
         </CardFooter>

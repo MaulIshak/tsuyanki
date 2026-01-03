@@ -101,25 +101,28 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
     <!-- Hero / Quick Action Section -->
     <div class="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
         <!-- Main Hero Card -->
-        <Card class="col-span-full lg:col-span-2 overflow-hidden border-none shadow-lg relative bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
-            <div class="absolute -top-10 -right-10 md:top-0 md:right-0 opacity-10 pointer-events-none">
+        <Card class="col-span-full lg:col-span-2 overflow-hidden border-none shadow-lg relative bg-gradient-to-br from-indigo-500 to-indigo-600 text-white group">
+            <div class="absolute -top-10 -right-10 md:top-0 md:right-0 opacity-10 pointer-events-none group-hover:scale-105 transition-transform duration-700">
                 <Zap class="w-40 h-40 md:w-64 md:h-64 rotate-12" />
             </div>
+            <!-- Decorative soft blobs for depth inside the card -->
+            <div class="absolute top-1/2 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+
             <CardContent class="relative z-10 p-6 sm:p-8 flex flex-col items-start justify-center h-full">
                 <div class="flex items-center gap-2 mb-4">
-                    <Badge variant="secondary" class="bg-white/20 hover:bg-white/30 text-white border-0">
-                        <Flame class="w-3 h-3 mr-1 text-orange-300" /> {{ streak }} Day Streak
+                    <Badge variant="secondary" class="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm">
+                        <Flame class="w-3 h-3 mr-1 text-orange-200" /> {{ streak }} Day Streak
                     </Badge>
                 </div>
                 
-                <h2 class="text-3xl font-bold mb-2">Ready to crush your goals?</h2>
-                <p class="text-indigo-100 mb-8 max-w-lg text-lg">
+                <h2 class="text-3xl font-bold mb-2 tracking-tight">Ready to flow?</h2>
+                <p class="text-indigo-50 mb-8 max-w-lg text-lg leading-relaxed">
                     You have <span class="font-bold text-white">{{ dueCount }} cards</span> waiting for review. 
-                    Consistency is the key to mastery!
+                    Consistency is the path to mastery.
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                    <Button @click="router.push('/study')" size="lg" class="w-full sm:w-auto bg-white text-indigo-600 hover:bg-indigo-50 font-bold border-0 shadow-md">
+                    <Button @click="router.push('/study')" size="lg" class="w-full sm:w-auto bg-white text-indigo-600 hover:bg-indigo-50 font-bold border-0 shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
                         <Play class="w-5 h-5 mr-2 fill-current" />
                         Start Review Session
                     </Button>
@@ -139,7 +142,7 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
                  <Skeleton class="h-16 w-full rounded-lg" />
              </div>
              
-             <div v-else-if="recentDecks.length === 0" class="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg text-slate-400">
+             <div v-else-if="recentDecks.length === 0" class="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-slate-400 bg-slate-50/50 dark:bg-slate-900/50">
                  <PlusCircle class="h-8 w-8 mb-2 opacity-50" />
                  <p class="text-sm">No decks yet</p>
                  <Button variant="link" @click="router.push('/decks/create')">Create one</Button>
@@ -150,19 +153,19 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
                     v-for="deck in recentDecks" 
                     :key="deck.id" 
                     @click="router.push(`/decks/${deck.id}`)"
-                    class="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors cursor-pointer"
+                    class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5 group"
                 >
                     <CardContent class="p-4 flex items-center justify-between">
                         <div>
-                            <h4 class="font-semibold text-slate-900 dark:text-slate-100 line-clamp-1">{{ deck.title }}</h4>
+                            <h4 class="font-semibold text-slate-900 dark:text-slate-100 line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ deck.title }}</h4>
                             <p class="text-xs text-slate-500 line-clamp-1">{{ deck.description || 'No description' }}</p>
                         </div>
-                        <Play class="h-4 w-4 text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <Play class="h-4 w-4 text-indigo-500 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
                     </CardContent>
                  </Card>
              </div>
              
-             <Button variant="outline" class="w-full border-dashed" @click="router.push('/decks/create')">
+             <Button variant="outline" class="w-full border-dashed border-slate-300 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 text-slate-600 dark:text-slate-400" @click="router.push('/decks/create')">
                 <PlusCircle class="w-4 h-4 mr-2" /> Create New Deck
              </Button>
         </div>
@@ -171,26 +174,26 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
     <!-- Stats Row Detailed -->
     <div class="grid gap-4 md:grid-cols-3">
       <!-- Cards Due -->
-      <Card class="border-none shadow-md bg-gradient-to-br from-rose-500 to-pink-600 text-white overflow-hidden relative group">
-        <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500">
-             <Clock class="w-24 h-24" />
+      <Card class="border-none shadow-md bg-white dark:bg-slate-800/50 backdrop-blur-sm overflow-hidden relative group hover:shadow-lg transition-all duration-300">
+        <div class="absolute right-0 top-0 opacity-5 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500 text-indigo-500">
+             <Clock class="w-32 h-32" />
         </div>
         <CardHeader class="flex flex-row items-center justify-between pb-2 relative z-10">
-          <CardTitle class="text-sm font-medium text-rose-100">
+          <CardTitle class="text-sm font-medium text-slate-500 dark:text-slate-400">
             Reviews Due
           </CardTitle>
-          <div class="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-            <Clock class="h-4 w-4 text-white" />
+          <div class="h-8 w-8 rounded-full bg-indigo-50 dark:bg-indigo-900/50 flex items-center justify-center">
+            <Clock class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
           </div>
         </CardHeader>
         <CardContent class="relative z-10">
           <div v-if="loading">
-             <Skeleton class="h-8 w-20 mb-1 bg-white/20" />
+             <Skeleton class="h-8 w-20 mb-1" />
           </div>
           <div v-else>
-            <div class="text-3xl font-bold">{{ dueCount }}</div>
-            <p class="text-xs text-rose-100 font-medium mt-1 flex items-center gap-1">
-              <span v-if="dueCount > 0" class="flex h-2 w-2 rounded-full bg-rose-200 animate-pulse"></span>
+            <div class="text-3xl font-bold text-slate-900 dark:text-slate-50">{{ dueCount }}</div>
+            <p class="text-xs text-slate-500 font-medium mt-1 flex items-center gap-1">
+              <span v-if="dueCount > 0" class="flex h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span>
               {{ dueCount > 0 ? 'Action required' : 'All caught up!' }}
             </p>
           </div>
@@ -198,51 +201,51 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
       </Card>
 
       <!-- Reviewed Today -->
-      <Card class="border-none shadow-md bg-gradient-to-br from-blue-500 to-cyan-600 text-white overflow-hidden relative group">
-        <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500">
-             <CheckCircle2 class="w-24 h-24" />
+      <Card class="border-none shadow-md bg-white dark:bg-slate-800/50 backdrop-blur-sm overflow-hidden relative group hover:shadow-lg transition-all duration-300">
+        <div class="absolute right-0 top-0 opacity-5 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500 text-emerald-500">
+             <CheckCircle2 class="w-32 h-32" />
         </div>
         <CardHeader class="flex flex-row items-center justify-between pb-2 relative z-10">
-          <CardTitle class="text-sm font-medium text-blue-100">
+          <CardTitle class="text-sm font-medium text-slate-500 dark:text-slate-400">
             Studied Today
           </CardTitle>
-           <div class="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-            <CheckCircle2 class="h-4 w-4 text-white" />
+           <div class="h-8 w-8 rounded-full bg-emerald-50 dark:bg-emerald-900/50 flex items-center justify-center">
+            <CheckCircle2 class="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </div>
         </CardHeader>
         <CardContent class="relative z-10">
            <div v-if="loading">
-             <Skeleton class="h-8 w-20 mb-1 bg-white/20" />
+             <Skeleton class="h-8 w-20 mb-1" />
           </div>
           <div v-else>
-            <div class="text-3xl font-bold">{{ reviewedToday }}</div>
-            <p class="text-xs text-blue-100 font-medium mt-1">
-               {{ Math.round((reviewedToday / 20) * 100) }}% of daily goal (20)
+            <div class="text-3xl font-bold text-slate-900 dark:text-slate-50">{{ reviewedToday }}</div>
+            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+               {{ Math.round((reviewedToday / 20) * 100) }}% of daily goal
             </p>
           </div>
         </CardContent>
       </Card>
 
       <!-- Mastery -->
-      <Card class="border-none shadow-md bg-gradient-to-br from-amber-500 to-orange-600 text-white overflow-hidden relative group">
-        <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500">
-             <Trophy class="w-24 h-24" />
+      <Card class="border-none shadow-md bg-white dark:bg-slate-800/50 backdrop-blur-sm overflow-hidden relative group hover:shadow-lg transition-all duration-300">
+        <div class="absolute right-0 top-0 opacity-5 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500 text-amber-500">
+             <Trophy class="w-32 h-32" />
         </div>
         <CardHeader class="flex flex-row items-center justify-between pb-2 relative z-10">
-          <CardTitle class="text-sm font-medium text-amber-100">
+          <CardTitle class="text-sm font-medium text-slate-500 dark:text-slate-400">
             Total Mastery
           </CardTitle>
-           <div class="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-            <Trophy class="h-4 w-4 text-white" />
+           <div class="h-8 w-8 rounded-full bg-amber-50 dark:bg-amber-900/50 flex items-center justify-center">
+            <Trophy class="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </div>
         </CardHeader>
         <CardContent class="relative z-10">
            <div v-if="loading">
-             <Skeleton class="h-8 w-20 mb-1 bg-white/20" />
+             <Skeleton class="h-8 w-20 mb-1" />
           </div>
           <div v-else>
-            <div class="text-3xl font-bold">{{ mastery }}%</div>
-            <p class="text-xs text-amber-100 font-medium mt-1">
+            <div class="text-3xl font-bold text-slate-900 dark:text-slate-50">{{ mastery }}%</div>
+            <p class="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">
               Of cards matured
             </p>
           </div>
