@@ -1,11 +1,12 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useFetch } from '@vueuse/core'
-import { ArrowLeft, Save, Loader2, Plus } from 'lucide-vue-next'
+import { ArrowLeft, Save, Loader2, Plus, X, Tag as TagIcon } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 import RichTextEditor from '@/components/RichTextEditor.vue'
 import {
   Select,
@@ -16,19 +17,28 @@ import {
 } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { parseMedia, resolveMediaUrl, deserializeContent, serializeContent } from '@/lib/mediaUtils'
-import { Paperclip, Image as ImageIcon, Music } from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
+
+// Debug route injection
+console.log('CardEditorView mounted. Route:', route)
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-const deckId = route.params.deckId // For creating new note
-const noteId = route.params.noteId // For editing existing note
+const deckId = route?.params?.deckId
+const noteId = route?.params?.noteId
 
 // State
 const noteTypes = ref([])
 const selectedNoteTypeId = ref(null)
 const fields = ref({})
-const tags = ref('')
+// const tags = ref('') // Removed old tags string
+const selectedTags = ref([]) // New tags array
+const tagInput = ref('')
+const scopedTags = ref([]) // Available tags in deck
+const showSuggestions = ref(false)
+const activeSuggestionIndex = ref(-1)
+
 const isLoading = ref(false)
 const isSubmitting = ref(false)
 const fieldEditors = ref({}) // Refs to editors
@@ -41,6 +51,14 @@ const activeFields = computed(() => {
     const type = noteTypes.value.find(t => t.id === selectedNoteTypeId.value)
     if (!type || !type.field_schema || !type.field_schema.fields) return []
     return type.field_schema.fields
+})
+
+const filteredSuggestions = computed(() => {
+    if (!tagInput.value) return scopedTags.value
+    return scopedTags.value.filter(tag => 
+        tag.name.toLowerCase().includes(tagInput.value.toLowerCase()) && 
+        !selectedTags.value.includes(tag.name)
+    )
 })
 
 // Fetch Note Types
@@ -65,6 +83,25 @@ const fetchNoteTypes = async () => {
     }
 }
 
+// Fetch Scoped Tags
+const fetchScopedTags = async (targetDeckId) => {
+    if (!targetDeckId) return
+    const token = localStorage.getItem('auth_token')
+    try {
+         console.log('Fetching scoped tags for deck:', targetDeckId)
+         const { data } = await useFetch(`${API_BASE_URL}/tags?deck_id=${targetDeckId}&limit=100`, {
+            headers: { Authorization: `Bearer ${token}` }
+        }).json()
+        
+        if (data.value) {
+            console.log('Scoped tags fetched:', data.value.data)
+            scopedTags.value = data.value.data
+        }
+    } catch (e) {
+        console.error('Failed to load tags', e)
+    }
+}
+
 // Fetch Note (if editing)
 const fetchNote = async () => {
     if (!noteId) return
@@ -85,6 +122,14 @@ const fetchNote = async () => {
                  fields.value[key] = deserializeContent(rawFields[key])
              }
              
+             // Set tags
+             if (note.tags) {
+                 selectedTags.value = note.tags.map(t => t.name)
+             }
+
+             // Start fetching scoped tags for THIS deck (note.deck_id)
+             fetchScopedTags(note.deck_id)
+             
              // Ensure note type exists
              if (note.note_type) {
                 const typeExists = noteTypes.value.some(t => t.id === note.note_type.id)
@@ -99,6 +144,53 @@ const fetchNote = async () => {
         isLoading.value = false
     }
 }
+
+// Tag Logic
+const addTag = () => {
+    const val = tagInput.value.trim()
+    if (!val) return
+    
+    // Check if exists in suggestions (case insensitive match for cleanup)
+    const existing = scopedTags.value.find(t => t.name.toLowerCase() === val.toLowerCase())
+    const nameToAdd = existing ? existing.name : val
+    
+    if (!selectedTags.value.includes(nameToAdd)) {
+        selectedTags.value.push(nameToAdd)
+    }
+    tagInput.value = ''
+    activeSuggestionIndex.value = -1
+}
+
+const selectTag = (tagName) => {
+    if (!selectedTags.value.includes(tagName)) {
+        selectedTags.value.push(tagName)
+    }
+    tagInput.value = ''
+    showSuggestions.value = false
+}
+
+const removeTag = (tagName) => {
+    selectedTags.value = selectedTags.value.filter(t => t !== tagName)
+}
+
+const navigateSuggestions = (step) => {
+    if (!showSuggestions.value) return
+    const len = filteredSuggestions.value.length
+    if (len === 0) return
+    activeSuggestionIndex.value = (activeSuggestionIndex.value + step + len) % len
+}
+
+const handleInputBlur = () => {
+    // Delay hiding suggestions to allow click event on suggestion item
+    setTimeout(() => {
+        showSuggestions.value = false
+    }, 200)
+}
+
+// Watch ENTER on suggestion
+watch(activeSuggestionIndex, (idx) => {
+     // Optional: Scroll to active item?
+})
 
 const onSubmit = async () => {
     // Basic validation
@@ -131,7 +223,7 @@ const onSubmit = async () => {
         const payload = {
              note_type_id: selectedNoteTypeId.value,
              fields: serializedFields,
-             tags: tags.value ? tags.value.split(',').map(t => t.trim()).filter(Boolean) : []
+             tags: selectedTags.value // Send array of strings
         }
 
         const { data, error } = await useFetch(url, {
@@ -145,18 +237,21 @@ const onSubmit = async () => {
 
         if (error.value) throw new Error(error.value)
         
-        toast.success(noteId ? 'Note updated' : 'Note created')
+        toast.success(noteId ? 'Card updated' : 'Card created')
         
         if (!noteId) {
             // Clear fields but keep type selection
             fields.value = {}
-            tags.value = ''
+            selectedTags.value = []
+            // Refresh tags so the new one is available
+            await fetchScopedTags(deckId)
+            // tags.value = ''
         } else {
             router.back()
         }
 
     } catch (e) {
-        toast.error('Failed to save note')
+        toast.error('Failed to save card')
         console.error(e)
     } finally {
         isSubmitting.value = false
@@ -188,11 +283,6 @@ const onFileSelected = async (event) => {
         if (error.value) throw new Error(error.value)
 
         const media = data.value
-        // Resolve URL 
-        // We know resolveMediaUrl uses VITE_API_BASE_URL logic but here we have the media object.
-        // Usually, editor expects the full URL for src.
-        // We can use resolveMediaUrl(media.storage_key)
-        
         const fullUrl = resolveMediaUrl(media.storage_key)
         
         const editorInstance = fieldEditors.value[activeUploadField.value]
@@ -214,9 +304,6 @@ const onFileSelected = async (event) => {
         if (fileInput.value) fileInput.value.value = '' 
     }
 }
-// Rethinking Upload:
-// RichTextEditor has its own "Insert Media" button causing an emit.
-// We should listen to that emit.
 
 const getFieldMedia = (content) => {
     return parseMedia(content)
@@ -224,7 +311,11 @@ const getFieldMedia = (content) => {
 
 onMounted(() => {
     fetchNoteTypes()
-    if (noteId) fetchNote()
+    if (noteId) {
+        fetchNote()
+    } else if (deckId) {
+        fetchScopedTags(deckId)
+    }
 })
 </script>
 
@@ -236,9 +327,9 @@ onMounted(() => {
 
     <Card>
         <CardHeader>
-            <CardTitle>{{ noteId ? 'Edit Note' : 'Add New Note' }}</CardTitle>
+            <CardTitle>{{ noteId ? 'Edit Card' : 'Add New Card' }}</CardTitle>
             <CardDescription>
-                {{ noteId ? 'Update the content of this note.' : 'Create a new note. Cards will be generated automatically.' }}
+                {{ noteId ? 'Update the content of this card.' : 'Create a new card.' }}
             </CardDescription>
         </CardHeader>
         <CardContent class="space-y-6">
@@ -248,7 +339,7 @@ onMounted(() => {
                 <label class="text-sm font-medium">Type</label>
                 <Select v-model="selectedNoteTypeId" :disabled="!!noteId">
                     <SelectTrigger>
-                        <SelectValue placeholder="Select a note type" />
+                        <SelectValue placeholder="Select a card type" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem v-for="type in noteTypes" :key="type.id" :value="type.id">
@@ -272,13 +363,50 @@ onMounted(() => {
             </div>
             <div v-else class="py-8 text-center text-slate-500">
                 <Loader2 v-if="isLoading" class="w-6 h-6 animate-spin mx-auto" />
-                <span v-else>Select a note type to see fields.</span>
+                <span v-else>Select a card type to see fields.</span>
             </div>
 
-             <!-- Tags (Optional) -->
+             <!-- Tags (Scoped to Deck) -->
              <div class="space-y-2">
-                <label class="text-sm font-medium">Tags (comma separated)</label>
-                <Input v-model="tags" placeholder="e.g. jlpt, grammar, verb" />
+                <label class="text-sm font-medium">Tags</label>
+                <div class="flex flex-wrap gap-2 mb-2" v-if="selectedTags.length > 0">
+                    <Badge v-for="tag in selectedTags" :key="tag" variant="secondary" class="gap-1 pr-1">
+                        {{ tag }}
+                        <div class="cursor-pointer rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 p-0.5" @click="removeTag(tag)">
+                            <X class="w-3 h-3" />
+                        </div>
+                    </Badge>
+                </div>
+                <div class="relative w-full">
+                    <div class="relative">
+                        <TagIcon class="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+                        <Input 
+                            v-model="tagInput" 
+                            placeholder="Add a tag..." 
+                            class="pl-9" 
+                            @keydown.enter.prevent="addTag"
+                            @keydown.down.prevent="navigateSuggestions(1)"
+                            @keydown.up.prevent="navigateSuggestions(-1)"
+                            @focus="showSuggestions = true"
+                            @blur="handleInputBlur"
+                        />
+                    </div>
+                    <!-- Suggestions Dropdown -->
+                    <div v-if="showSuggestions && filteredSuggestions.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-slate-900 border rounded-md shadow-lg max-h-60 overflow-auto">
+                        <div 
+                            v-for="(tag, index) in filteredSuggestions" 
+                            :key="tag.id"
+                            class="px-4 py-2 text-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+                            :class="{ 'bg-slate-100 dark:bg-slate-800': activeSuggestionIndex === index }"
+                            @click="selectTag(tag.name)"
+                        >
+                            {{ tag.name }}
+                        </div>
+                    </div>
+                     <div v-if="showSuggestions && tagInput && !filteredSuggestions.some(t => t.name.toLowerCase() === tagInput.toLowerCase())" class="absolute z-10 w-full mt-1 bg-white dark:bg-slate-900 border rounded-md shadow-lg p-2">
+                        <div class="text-xs text-slate-500 px-2 py-1">Type Enter to create new tag "{{ tagInput }}"</div>
+                    </div>
+                </div>
             </div>
 
         </CardContent>
@@ -291,13 +419,18 @@ onMounted(() => {
                  <Button class="flex-1 sm:flex-none" @click="onSubmit" :disabled="isSubmitting">
                     <Loader2 v-if="isSubmitting" class="w-4 h-4 mr-2 animate-spin" />
                     <Save v-else class="w-4 h-4 mr-2" />
-                    {{ noteId ? 'Save Changes' : 'Add Note' }}
+                    {{ noteId ? 'Save Changes' : 'Add Card' }}
                 </Button>
             </div>
         </CardFooter>
     </Card>
+    <!-- Hidden File Input -->
+     <input
+        type="file"
+        ref="fileInput"
+        class="hidden"
+        accept="image/*,audio/*,video/*"
+        @change="onFileSelected"
+    />
   </div>
-
-  <!-- Hidden File Input -->
-  <input type="file" ref="fileInput" class="hidden" accept="audio/*,image/*" @change="onFileSelected" />
 </template>

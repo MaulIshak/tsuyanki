@@ -14,7 +14,13 @@ class Tag extends Model
 
     protected $fillable = [
         'name',
+        'deck_id',
     ];
+
+    public function deck(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Deck::class);
+    }
 
     public function notes(): BelongsToMany
     {

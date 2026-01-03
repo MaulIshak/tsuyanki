@@ -1,8 +1,8 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useFetch } from '@vueuse/core'
-import { ArrowLeft, Plus, MoreHorizontal, Settings, FileText, Trash2, Pencil, Loader2 } from 'lucide-vue-next'
+import { useFetch, useDebounceFn } from '@vueuse/core'
+import { ArrowLeft, Plus, MoreHorizontal, Settings, FileText, Trash2, Pencil, Loader2, Search, Filter, SortAsc, SortDesc, Tag as TagIcon } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -22,6 +22,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from '@/components/ui/dropdown-menu'
 import {
   AlertDialog,
@@ -43,6 +48,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'vue-sonner'
 import { deserializeContent } from '@/lib/mediaUtils'
 
@@ -58,6 +70,13 @@ const totalNotes = ref(0)
 const currentPage = ref(1)
 const isLoading = ref(true)
 
+// Filter/Sort State
+const searchQuery = ref('')
+const sortOrder = ref('desc') // desc or asc
+const sortBy = ref('created_at') // created_at or updated_at
+const filterTag = ref('all') // 'all' or specific tag name
+const availableTags = ref([])
+
 // Fetch Deck Details
 const fetchDeck = async () => {
     const token = localStorage.getItem('auth_token')
@@ -71,6 +90,21 @@ const fetchDeck = async () => {
     }
 }
 
+// Fetch Available Tags
+const fetchTags = async () => {
+    const token = localStorage.getItem('auth_token')
+    try {
+        // Ideally backend should provide tags specific to this deck or all tags
+        // For now fetching all tags
+        const { data } = await useFetch(`${API_BASE_URL}/tags?deck_id=${deckId}&limit=100`, {
+             headers: { Authorization: `Bearer ${token}` }
+        }).json()
+        if (data.value) availableTags.value = data.value.data
+    } catch (e) {
+        console.error('Failed to load tags')
+    }
+}
+
 // Fetch Notes in Deck
 const fetchNotes = async () => {
     isLoading.value = true
@@ -78,7 +112,13 @@ const fetchNotes = async () => {
     try {
         const url = new URL(`${API_BASE_URL}/decks/${deckId}/notes`)
         url.searchParams.append('page', currentPage.value)
-        url.searchParams.append('limit', 20) // Updated to 20 to match user expectation and backend defaults
+        url.searchParams.append('limit', 20)
+        
+        if (searchQuery.value) url.searchParams.append('search', searchQuery.value)
+        if (filterTag.value && filterTag.value !== 'all') url.searchParams.append('tag', filterTag.value)
+        
+        url.searchParams.append('sort', sortBy.value)
+        url.searchParams.append('order', sortOrder.value)
 
         const { data } = await useFetch(url.toString(), {
             headers: { Authorization: `Bearer ${token}` }
@@ -96,6 +136,18 @@ const fetchNotes = async () => {
     }
 }
 
+// Debounced Search
+const onSearch = useDebounceFn(() => {
+    currentPage.value = 1
+    fetchNotes()
+}, 500)
+
+const onFilterChange = () => {
+    currentPage.value = 1
+    fetchNotes()
+}
+
+// ... (Delete Note logic remains same) ...
 const noteToDelete = ref(null)
 const isNoteDeleteOpen = ref(false)
 const isNoteDeleting = ref(false)
@@ -136,6 +188,7 @@ const navigateToAdd = () => {
     router.push(`/decks/${deckId}/add`)
 }
 
+// ... (Deck Edit/Delete Logic remains same) ...
 const editForm = ref({
     title: '',
     description: ''
@@ -160,7 +213,6 @@ const updateDeck = async () => {
         if (error.value) throw new Error('Update failed')
         
         toast.success('Deck updated')
-        // Update local state without refetching
         if (deck.value) {
             deck.value.title = editForm.value.title
             deck.value.description = editForm.value.description
@@ -216,9 +268,10 @@ const deleteDeck = async () => {
 }
 
 onMounted(async () => {
-    await Promise.all([fetchDeck(), fetchNotes()])
+    await Promise.all([fetchDeck(), fetchNotes(), fetchTags()])
 })
 
+// ... (Rest of logic: watch, getNoteFront, getNoteBack) ...
 watch(deck, (newDeck) => {
     if (newDeck) {
         editForm.value = { 
@@ -230,55 +283,24 @@ watch(deck, (newDeck) => {
 
 const getNoteFront = (note) => {
     if (!note.fields) return { label: 'Front', content: 'N/A' }
-    
-    // Explicit exclusions (common metadata fields)
     const excludeKeys = ['pos', 'part of speech', 'id', 'audio', 'sound', 'image', 'picture', 'note', 'notes']
-    // Priorities for Front
     const priorityKeys = ['expression', 'vocabulary', 'vocab', 'word', 'kanji', 'term', 'front', 'question', 'kana']
-    
     const keys = Object.keys(note.fields)
-    const lowerMap = keys.reduce((acc, k) => {
-        acc[k.toLowerCase()] = k
-        return acc
-    }, {})
-
-    // Check priorities
-    for (const key of priorityKeys) {
-        if (lowerMap[key]) return { label: lowerMap[key], content: deserializeContent(note.fields[lowerMap[key]]) }
-    }
-    
-    // Fallback: Find first field that is NOT in exclude list and has content
-    for (const key of keys) {
-        if (!excludeKeys.includes(key.toLowerCase())) {
-            return { label: key, content: deserializeContent(note.fields[key]) }
-        }
-    }
-    
-    const firstKey = keys[0]
-    return { label: firstKey || 'Front', content: deserializeContent(note.fields[firstKey] || 'N/A') }
+    const lowerMap = keys.reduce((acc, k) => { acc[k.toLowerCase()] = k; return acc }, {})
+    for (const key of priorityKeys) { if (lowerMap[key]) return { label: lowerMap[key], content: deserializeContent(note.fields[lowerMap[key]]) } }
+    for (const key of keys) { if (!excludeKeys.includes(key.toLowerCase())) return { label: key, content: deserializeContent(note.fields[key]) } }
+    const firstKey = keys[0]; return { label: firstKey || 'Front', content: deserializeContent(note.fields[firstKey] || 'N/A') }
 }
 
 const getNoteBack = (note) => {
     if (!note.fields) return { label: 'Back', content: '' }
-    
     const excludeKeys = ['audio', 'sound', 'image', 'picture']
     const priorityKeys = ['meaning', 'definition', 'english', 'reading', 'back', 'answer', 'glossary']
     const keys = Object.keys(note.fields)
-    const lowerMap = keys.reduce((acc, k) => {
-        acc[k.toLowerCase()] = k
-        return acc
-    }, {})
-
-    for (const key of priorityKeys) {
-        if (lowerMap[key]) return { label: lowerMap[key], content: deserializeContent(note.fields[lowerMap[key]]) }
-    }
-
-    // Fallback: Second non-excluded field?
+    const lowerMap = keys.reduce((acc, k) => { acc[k.toLowerCase()] = k; return acc }, {})
+    for (const key of priorityKeys) { if (lowerMap[key]) return { label: lowerMap[key], content: deserializeContent(note.fields[lowerMap[key]]) } }
     const validKeys = keys.filter(k => !excludeKeys.includes(k.toLowerCase()))
-    if (validKeys.length > 1) {
-        return { label: validKeys[1], content: deserializeContent(note.fields[validKeys[1]]) }
-    }
-
+    if (validKeys.length > 1) return { label: validKeys[1], content: deserializeContent(note.fields[validKeys[1]]) }
     return { label: 'Back', content: '' }
 }
 </script>
@@ -320,7 +342,61 @@ const getNoteBack = (note) => {
 
         <TabsContent value="cards" class="space-y-4">
             
-            <!-- Mobile List (Visible on sm/mobile only, < sm:hidden) -->
+            <!-- Controls (Search, Filter, Sort) -->
+            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-lg border shadow-sm">
+                <div class="relative w-full sm:w-72">
+                    <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+                    <Input 
+                        placeholder="Search cards..." 
+                        class="pl-9" 
+                        v-model="searchQuery"
+                        @input="onSearch"
+                    />
+                </div>
+                
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <!-- Filter Tag -->
+                    <Select v-model="filterTag" @update:model-value="onFilterChange">
+                        <SelectTrigger class="w-[150px]">
+                            <div class="flex items-center gap-2">
+                                <Filter class="w-3.5 h-3.5" />
+                                <span class="truncate">{{ filterTag === 'all' ? 'All Tags' : filterTag }}</span>
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Tags</SelectItem>
+                            <SelectItem v-for="tag in availableTags" :key="tag.id" :value="tag.name">
+                                {{ tag.name }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <!-- Sort -->
+                    <DropdownMenu>
+                        <DropdownMenuTrigger as-child>
+                            <Button variant="outline" class="gap-2">
+                                <SortAsc v-if="sortOrder === 'asc'" class="w-4 h-4" />
+                                <SortDesc v-else class="w-4 h-4" />
+                                Sort
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" class="w-48">
+                            <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup v-model="sortBy" @update:model-value="onFilterChange">
+                                <DropdownMenuRadioItem value="created_at">Created Date</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="updated_at">Updated Date</DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel>Order</DropdownMenuLabel>
+                            <DropdownMenuRadioGroup v-model="sortOrder" @update:model-value="onFilterChange">
+                                <DropdownMenuRadioItem value="desc">Newest First</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="asc">Oldest First</DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </div>
             <div class="space-y-4 md:hidden">
                 <div v-if="isLoading" class="space-y-4">
                      <Skeleton v-for="i in 3" :key="i" class="h-32 w-full rounded-lg" />
@@ -330,8 +406,14 @@ const getNoteBack = (note) => {
                 </div>
                 <div v-else v-for="note in notes" :key="note.id" class="rounded-lg border bg-white dark:bg-slate-900 p-4 space-y-3 shadow-sm">
                     <div class="flex justify-between items-start">
-                        <!-- Use note_type related name if available, fallback safely -->
-                        <Badge variant="secondary" class="text-xs shrink-0">{{ note.note_type?.name || note.type?.name || 'Card' }}</Badge>
+                        <div class="flex flex-col gap-1">
+                            <Badge variant="secondary" class="text-xs shrink-0 self-start">{{ note.note_type?.name || 'Card' }}</Badge>
+                             <div v-if="note.tags && note.tags.length > 0" class="flex flex-wrap gap-1">
+                                <Badge v-for="tag in note.tags" :key="tag.id" variant="outline" class="text-[10px] px-1 py-0 h-4">
+                                    {{ tag.name }}
+                                </Badge>
+                             </div>
+                        </div>
                         <DropdownMenu>
                             <DropdownMenuTrigger as-child>
                                 <Button variant="ghost" class="h-8 w-8 p-0 -mr-2 -mt-2 text-slate-400">
@@ -369,9 +451,10 @@ const getNoteBack = (note) => {
                     <TableHeader>
                         <TableRow>
                             <TableHead class="w-[30%]">Front</TableHead>
-                            <TableHead class="w-[40%]">Back</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead class="text-right">Actions</TableHead>
+                            <TableHead class="w-[30%]">Back</TableHead>
+                            <TableHead class="w-[15%]">Type</TableHead>
+                            <TableHead class="w-[15%]">Tags</TableHead>
+                            <TableHead class="text-right w-[10%]">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -379,28 +462,38 @@ const getNoteBack = (note) => {
                              <TableCell><Skeleton class="h-4 w-20" /></TableCell>
                              <TableCell><Skeleton class="h-4 w-32" /></TableCell>
                              <TableCell><Skeleton class="h-4 w-16" /></TableCell>
+                             <TableCell><Skeleton class="h-4 w-16" /></TableCell>
                              <TableCell><Skeleton class="h-8 w-8 ml-auto" /></TableCell>
                         </TableRow>
                         
                         <TableRow v-else-if="notes.length === 0">
-                            <TableCell colspan="4" class="h-24 text-center">
+                            <TableCell colspan="5" class="h-24 text-center">
                                 No cards found. Start by adding one!
                             </TableCell>
                         </TableRow>
 
                         <TableRow v-else v-for="note in notes" :key="note.id">
-                            <TableCell class="font-medium truncate max-w-[300px]">
+                            <TableCell class="font-medium truncate max-w-[250px] align-top">
                                 <span class="text-xs text-slate-400 block mb-0.5">{{ getNoteFront(note).label }}</span>
                                 <span v-html="getNoteFront(note).content"></span>
                             </TableCell>
-                            <TableCell class="truncate max-w-[300px]">
+                            <TableCell class="truncate max-w-[250px] align-top">
                                 <span class="text-xs text-slate-400 block mb-0.5">{{ getNoteBack(note).label }}</span>
                                 <span v-html="getNoteBack(note).content"></span>
                             </TableCell>
-                            <TableCell>
-                                <Badge variant="secondary" class="text-xs">{{ note.note_type?.name || note.type?.name || 'Card' }}</Badge>
+                            <TableCell class="align-top">
+                                <Badge variant="secondary" class="text-xs whitespace-nowrap">
+                                    {{ note.note_type?.name || 'Card' }}
+                                </Badge>
                             </TableCell>
-                            <TableCell class="text-right">
+                            <TableCell class="align-top">
+                                <div class="flex flex-wrap gap-1">
+                                    <Badge v-for="tag in note.tags" :key="tag.id" variant="outline" class="text-[10px] px-1 h-5 whitespace-nowrap">
+                                        {{ tag.name }}
+                                    </Badge>
+                                </div>
+                            </TableCell>
+                            <TableCell class="text-right align-top">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger as-child>
                                         <Button variant="ghost" class="h-8 w-8 p-0">

@@ -127,9 +127,9 @@ const onUpload = async () => {
             </div>
             <p class="text-slate-500 dark:text-slate-400 text-lg">Migrate your decks and cards effortlessly.</p>
         </div>
-        <Button variant="outline" @click="router.back()" class="hidden sm:flex">
+        <!-- <Button variant="outline" @click="router.back()" class="hidden sm:flex">
             <ArrowLeft class="w-4 h-4 mr-2" /> Back
-        </Button>
+        </Button> -->
     </div>
 
     <!-- Stepper / Progress Indicator -->

@@ -10,9 +10,13 @@ class TagController extends Controller
 {
     public function index(Request $request)
     {
-        $tags = Tag::query()
-            ->withCount('notes')
-            ->paginate($request->input('limit', 50));
+        $query = Tag::query()->withCount('notes')->orderBy('name', 'asc');
+
+        if ($request->filled('deck_id')) {
+            $query->where('deck_id', $request->input('deck_id'));
+        }
+
+        $tags = $query->paginate($request->input('limit', 50));
 
         return $this->paginateResponse($tags);
     }

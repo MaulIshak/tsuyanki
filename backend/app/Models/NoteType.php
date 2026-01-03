@@ -13,7 +13,13 @@ class NoteType extends Model
     protected $fillable = [
         'name',
         'field_schema',
+        'user_id',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     protected $casts = [
         'field_schema' => 'array',

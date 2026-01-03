@@ -135,6 +135,47 @@ class AnkiImportService
     protected function importNoteTypes($ankiModels)
     {
         foreach ($ankiModels as $id => $modelData) {
+            // Check for existing NoteType
+            // Logic: Match Name AND (User ID matches OR User ID is null (Global))
+            $existingType = NoteType::where('name', $modelData['name'])
+                ->where(function ($query) {
+                    $query->where('user_id', $this->user->id)
+                        ->orWhereNull('user_id');
+                })
+                ->first();
+
+            if ($existingType) {
+                $this->modelMap[$id] = $existingType->id;
+
+                // Map templates for this existing type
+                // We need to find the specific template IDs for the existing type
+                // Assuming standard naming or order?
+                // Anki templates have 'ord'. Tsuyanki templates don't track 'ord' explicitly but by creation order or Name?
+                // Let's look up templates by Name.
+                foreach ($modelData['tmpls'] as $tmpl) {
+                    $template = CardTemplate::where('note_type_id', $existingType->id)
+                        ->where('name', $tmpl['name'])
+                        ->first();
+
+                    if ($template) {
+                        $this->templateMap["{$id}_{$tmpl['ord']}"] = $template->id;
+                    } else {
+                        // Create missing template if schema evolved? 
+                        // Or just create it now to be safe.
+                        $newTemplate = CardTemplate::create([
+                            'note_type_id' => $existingType->id,
+                            'name' => $tmpl['name'],
+                            'front_template' => $tmpl['qfmt'],
+                            'back_template' => $tmpl['afmt'],
+                        ]);
+                        $this->templateMap["{$id}_{$tmpl['ord']}"] = $newTemplate->id;
+                    }
+                }
+
+                continue;
+            }
+
+            // Create New NoteType
             $fields = [];
             foreach ($modelData['flds'] as $fld) {
                 $fields[] = [
@@ -147,6 +188,7 @@ class AnkiImportService
             $noteType = NoteType::create([
                 'name' => $modelData['name'],
                 'field_schema' => ['fields' => $fields],
+                'user_id' => $this->user->id, // Scope to user
             ]);
 
             $this->modelMap[$id] = $noteType->id;

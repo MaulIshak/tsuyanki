@@ -22,9 +22,11 @@ class NoteController extends Controller
             'per_page' => 'integer|min:1|max:100',
             'tag' => 'nullable|string',
             'search' => 'nullable|string',
+            'sort' => 'in:created_at,updated_at,fields',
+            'order' => 'in:asc,desc',
         ]);
 
-        $query = $deck->notes()->with(['cards.reviewState', 'media', 'tags']);
+        $query = $deck->notes()->with(['cards.reviewState', 'media', 'tags', 'noteType']);
 
         if ($request->filled('tag')) {
             $query->whereHas('tags', function ($q) use ($request) {
@@ -38,6 +40,11 @@ class NoteController extends Controller
             // Postgres supports casting jsonb to text
             $query->whereRaw("fields::text ilike ?", ["%{$search}%"]);
         }
+
+        $sort = $request->input('sort', 'created_at');
+        $order = $request->input('order', 'desc');
+
+        $query->orderBy($sort, $order);
 
         $notes = $query->paginate($request->input('per_page', 20));
 
@@ -65,10 +72,13 @@ class NoteController extends Controller
             ]);
 
             if (!empty($validated['tags'])) {
-                // Find or create tags
+                // Find or create tags scoped to deck
                 $tagIds = [];
                 foreach ($validated['tags'] as $tagName) {
-                    $tag = \App\Models\Tag::firstOrCreate(['name' => $tagName]);
+                    $tag = \App\Models\Tag::firstOrCreate([
+                        'name' => $tagName,
+                        'deck_id' => $deck->id
+                    ]);
                     $tagIds[] = $tag->id;
                 }
                 $note->tags()->sync($tagIds);
@@ -126,7 +136,11 @@ class NoteController extends Controller
             if (isset($validated['tags'])) {
                 $tagIds = [];
                 foreach ($validated['tags'] as $tagName) {
-                    $tag = \App\Models\Tag::firstOrCreate(['name' => $tagName]);
+                    // Scope tag to note's deck
+                    $tag = \App\Models\Tag::firstOrCreate([
+                        'name' => $tagName,
+                        'deck_id' => $note->deck_id
+                    ]);
                     $tagIds[] = $tag->id;
                 }
                 $note->tags()->sync($tagIds);
