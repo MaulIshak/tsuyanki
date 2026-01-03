@@ -77,11 +77,16 @@ const fetchDecks = async () => {
     isFetchingDecks.value = true
     const token = localStorage.getItem('auth_token')
     try {
-        const { data } = await useFetch(`${API_BASE_URL}/decks`, {
+        const url = new URL(`${API_BASE_URL}/decks`)
+        url.searchParams.append('limit', '100') // Fetch more decks for the dropdown
+        
+        const { data } = await useFetch(url.toString(), {
             headers: { Authorization: `Bearer ${token}` }
         }).json()
+        
         if (data.value) {
-            decks.value = data.value
+            // Handle paginated response (Laravel resource) or direct array
+            decks.value = Array.isArray(data.value) ? data.value : (data.value.data || [])
         }
     } catch (e) {
         toast.error('Failed to load decks')
