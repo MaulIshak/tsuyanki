@@ -1,0 +1,1 @@
+import{l as a,o as t,r as o,z as l,u as c,f as n}from"./index-ZLCpMZbQ.js";const f={__name:"CardFooter",props:{class:{type:null,required:!1}},setup(e){const s=e;return(r,p)=>(t(),a("div",{"data-slot":"card-footer",class:l(c(n)("flex items-center px-6 [.border-t]:pt-6",s.class))},[o(r.$slots,"default")],2))}};export{f as _};

@@ -73,27 +73,34 @@ class Card extends Model
 
         // 1. Audio: [sound:filename.mp3] -> <audio>
         $html = preg_replace_callback('/\[sound:(.*?)\]/', function ($matches) {
-            $filename = $matches[1];
-            // Use config('app.url') . '/storage/media/' . $filename explicitly or asset function
-            // We use /storage/media/ assuming relative path processing by browser or full URL if needed
-            // For API, returning full URL is safer.
-            $url = asset('storage/media/' . $filename);
+            $src = $matches[1];
+
+            if (str_starts_with($src, 'http') || str_starts_with($src, 'data:')) {
+                $url = $src;
+            } elseif (str_starts_with($src, 'media/')) {
+                $url = asset('storage/' . $src);
+            } else {
+                $url = asset('storage/media/' . $src);
+            }
             return '<audio controls src="' . $url . '" class="w-full mt-2"></audio>';
         }, $html);
 
-        // 2. Images: src="filename.jpg" (no path) -> src="URL/storage/media/filename.jpg"
-        // Match src="..." where value has no slash
-        $html = preg_replace_callback('/(<img\s+[^>]*src=["\'])([^"\'\/]+)(["\'][^>]*>)/i', function ($matches) {
+        // 2. Images: src="filename.jpg" -> src="URL/storage/media/filename.jpg"
+        $html = preg_replace_callback('/(<img\s+[^>]*src=["\'])([^"\']+)(["\'][^>]*>)/i', function ($matches) {
             $prefix = $matches[1];
-            $filename = $matches[2];
+            $src = $matches[2];
             $suffix = $matches[3];
 
-            // Skip placeholders or data URIs
-            if (str_starts_with($filename, 'data:') || str_starts_with($filename, 'http')) {
+            // Skip placeholders or data URIs or full URLs
+            if (str_starts_with($src, 'data:') || str_starts_with($src, 'http')) {
                 return $matches[0];
             }
 
-            $url = asset('storage/media/' . $filename);
+            if (str_starts_with($src, 'media/')) {
+                $url = asset('storage/' . $src);
+            } else {
+                $url = asset('storage/media/' . $src);
+            }
             return $prefix . $url . $suffix;
         }, $html);
 

@@ -14,7 +14,7 @@ const handleSwitchToRegister = () => {
 </script>
 
 <template>
-  <div class="container relative flex min-h-screen flex-col items-center md:justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0 py-8 md:py-0">
+  <div class="relative flex min-h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0 lg:h-screen lg:overflow-hidden">
     <div class="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
       <div class="absolute inset-0 bg-zinc-900" />
       <img
@@ -39,13 +39,8 @@ const handleSwitchToRegister = () => {
         </blockquote>
       </div>
     </div>
-    <div class="flex h-full items-center justify-center p-6 lg:p-8 relative">
-      <div class="absolute right-4 top-4 md:right-8 md:top-8">
-        <RouterLink to="/about" class="text-sm font-medium text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
-          About
-        </RouterLink>
-      </div>
-      <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
+    <div class="flex h-full w-full items-center justify-center p-4 lg:p-8 relative">
+      <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px] md:w-[400px]">
         <!-- Mobile Logo + Text -->
         <div class="flex flex-col items-center gap-3 text-center lg:hidden">
              <div class="flex items-center gap-2">
@@ -58,7 +53,7 @@ const handleSwitchToRegister = () => {
              </div>
         </div>
 
-        <div class="bg-white/50 backdrop-blur-sm dark:bg-slate-900/50 p-6 sm:p-8 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800">
+        <div class="p-0 lg:bg-white/50 lg:backdrop-blur-sm lg:dark:bg-slate-900/50 lg:p-8 lg:rounded-xl lg:shadow-lg lg:border lg:border-slate-200 lg:dark:border-slate-800">
              <LoginForm 
               @auth-success="handleAuthSuccess"
               @switch-to-register="handleSwitchToRegister"
