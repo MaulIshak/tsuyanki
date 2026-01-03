@@ -48,7 +48,7 @@ import {
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative min-h-screen flex items-center pt-20 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section class="relative min-h-screen flex items-center pt-32 pb-16 md:pt-20 md:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
         <div class="space-y-8 text-center lg:text-left">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 text-sm font-medium border border-indigo-100 dark:border-indigo-800">
@@ -59,11 +59,11 @@ import {
             A smarter way to learn
           </div>
           
-          <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+          <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
             Remember <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">Everything</span> You Learn.
           </h1>
           
-          <p class="text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+          <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
             Tsuyanki uses spaced repetition to help you memorize languages, facts, and concepts efficiently. Study less, remember more.
           </p>
           
@@ -83,9 +83,9 @@ import {
         </div>
 
         <!-- Hero Visual/Abstract -->
-        <div class="relative lg:h-[600px] flex items-center justify-center">
+        <div class="relative lg:h-[600px] flex items-center justify-center mt-8 lg:mt-0">
              <!-- Card Stack Animation -->
-             <div class="relative w-72 h-96 sm:w-80 sm:h-[420px]">
+             <div class="relative w-72 h-96 sm:w-80 sm:h-[420px] scale-90 sm:scale-100 transform-gpu">
                 <!-- Back Cards -->
                 <div class="absolute inset-0 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 transform translate-x-4 translate-y-4 rotate-6 opacity-60 scale-95 origin-bottom-right"></div>
                 <div class="absolute inset-0 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 transform -translate-x-4 translate-y-2 -rotate-3 opacity-80 scale-95 origin-bottom-left"></div>
@@ -113,22 +113,22 @@ import {
                 </div>
 
                 <!-- Floating Elements -->
-                 <div class="absolute -right-12 top-10 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 animate-bounce duration-[3000ms]">
+                 <div class="absolute -right-8 sm:-right-12 top-10 bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 animate-bounce duration-[3000ms]">
                     <div class="flex items-center gap-3">
-                        <div class="bg-green-100 dark:bg-green-900/30 p-2 rounded-full text-green-600"><CheckCircle2 class="w-5 h-5" /></div>
+                        <div class="bg-green-100 dark:bg-green-900/30 p-2 rounded-full text-green-600"><CheckCircle2 class="w-4 h-4 sm:w-5 sm:h-5" /></div>
                         <div>
-                            <p class="text-xs text-slate-400">Status</p>
-                            <p class="font-bold text-slate-800 dark:text-slate-200">Memorized</p>
+                            <p class="text-[10px] sm:text-xs text-slate-400">Status</p>
+                            <p class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200">Memorized</p>
                         </div>
                     </div>
                  </div>
                  
-                 <div class="absolute -left-8 bottom-20 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 animate-bounce duration-[4000ms]">
+                 <div class="absolute -left-4 sm:-left-8 bottom-20 bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 animate-bounce duration-[4000ms]">
                     <div class="flex items-center gap-3">
-                        <div class="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-full text-indigo-600"><Clock class="w-5 h-5" /></div>
+                        <div class="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-full text-indigo-600"><Clock class="w-4 h-4 sm:w-5 sm:h-5" /></div>
                         <div>
-                            <p class="text-xs text-slate-400">Next Review</p>
-                            <p class="font-bold text-slate-800 dark:text-slate-200">3 Days</p>
+                            <p class="text-[10px] sm:text-xs text-slate-400">Next Review</p>
+                            <p class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200">3 Days</p>
                         </div>
                     </div>
                  </div>
@@ -138,11 +138,11 @@ import {
     </section>
 
     <!-- Problem & Insight -->
-    <section class="py-24 bg-white dark:bg-slate-900 relative">
+    <section class="py-16 sm:py-24 bg-white dark:bg-slate-900 relative">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-12 relative z-10">
             <div class="space-y-4">
                 <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">Why do we forget?</h2>
-                <p class="text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto">
+                <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto">
                     Information leaks out of our brains over time. It’s natural, but frustrating when you're trying to learn.
                 </p>
             </div>
@@ -174,7 +174,7 @@ import {
     </section>
 
     <!-- How Tsuyanki Works -->
-    <section id="how-it-works" class="py-24 px-4 sm:px-6 relative overflow-hidden">
+    <section id="how-it-works" class="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
         <div class="max-w-6xl mx-auto space-y-16 relative z-10">
             <div class="text-center space-y-4">
                 <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">How Tsuyanki Works</h2>
@@ -219,9 +219,9 @@ import {
     </section>
 
     <!-- Visual Feature Preview -->
-    <section class="py-24 bg-slate-900 text-white overflow-hidden relative">
+    <section class="py-16 sm:py-24 bg-slate-900 text-white overflow-hidden relative">
         <!-- Background Glow -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[800px] h-[600px] sm:h-[800px] bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
             <div class="space-y-8">
@@ -264,7 +264,7 @@ import {
             </div>
             
             <!-- Abstract UI Preview -->
-            <div class="relative rounded-xl bg-slate-800/50 border border-slate-700/50 p-2 shadow-2xl skew-y-1 lg:skew-y-3 transform hover:skew-y-0 transition-transform duration-700">
+            <div class="relative rounded-xl bg-slate-800/50 border border-slate-700/50 p-2 shadow-2xl lg:skew-y-3 transform hover:skew-y-0 transition-transform duration-700">
                 <div class="rounded-lg overflow-hidden bg-slate-950 aspect-video relative flex flex-col">
                     <!-- Fake Window Header -->
                     <div class="h-8 bg-slate-900 border-b border-slate-800 flex items-center px-4 gap-2">
@@ -294,12 +294,12 @@ import {
     </section>
 
     <!-- CTA Section -->
-    <section class="py-24 px-4 sm:px-6 relative">
+    <section class="py-16 sm:py-24 px-4 sm:px-6 relative">
         <div class="max-w-4xl mx-auto text-center space-y-8 relative z-10">
-            <h2 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h2 class="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">
                 Ready to stop forgetting?
             </h2>
-            <p class="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+            <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
                 Join others who are mastering languages and exams with Tsuyanki.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
