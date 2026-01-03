@@ -21,7 +21,6 @@ const navigation = [
   { name: 'Study', href: '/study', icon: BookOpen },
   { name: 'Decks', href: '/decks', icon: Layers },
   { name: 'Import', href: '/import', icon: Upload },
-  { name: 'About Tsuyanki', href: '/info', icon: Info },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
