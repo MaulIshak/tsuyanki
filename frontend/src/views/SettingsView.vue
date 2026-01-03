@@ -30,15 +30,30 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const isLoading = ref(true)
 const isSaving = ref(false)
+const isDeleting = ref(false)
 const isDark = useDark()
+const router = useRouter()
 
 const form = reactive({
     name: '',
     email: '',
+    avatar: '',
+    google_id: null,
     preferences: {
         daily_goal: '20',
         theme: 'system',
@@ -57,6 +72,8 @@ const fetchUser = async () => {
         if (data.value) {
             form.name = data.value.name
             form.email = data.value.email
+            form.avatar = data.value.avatar
+            form.google_id = data.value.google_id
             if (data.value.preferences) {
                 // Merge preferences carefully
                 form.preferences = { ...form.preferences, ...data.value.preferences }
@@ -112,6 +129,33 @@ const saveSettings = async () => {
     }
 }
 
+const handleDeleteAccount = async () => {
+    isDeleting.value = true
+    const token = localStorage.getItem('auth_token')
+    
+    try {
+        const { error } = await useFetch(`${API_BASE_URL}/auth/user`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        }).json()
+
+        if (error.value) throw new Error('Deletion failed')
+
+        toast.success('Account deleted successfully')
+        
+        // Clear local storage
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('user_data')
+        
+        // Redirect to login
+        router.push('/login')
+    } catch (e) {
+        toast.error('Failed to delete account')
+    } finally {
+        isDeleting.value = false
+    }
+}
+
 onMounted(() => {
     fetchUser()
 })
@@ -136,7 +180,7 @@ onMounted(() => {
         <TabsTrigger value="profile" class="gap-2"><User class="w-4 h-4"/> Profile</TabsTrigger>
         <TabsTrigger value="learning" class="gap-2"><BookOpen class="w-4 h-4"/> Learning</TabsTrigger>
         <TabsTrigger value="appearance" class="gap-2"><Monitor class="w-4 h-4"/> Appearance</TabsTrigger>
-        <!-- <TabsTrigger value="account" class="gap-2 text-red-600"><AlertTriangle class="w-4 h-4"/> Danger Zone</TabsTrigger> -->
+        <TabsTrigger value="account" class="gap-2 text-red-600"><AlertTriangle class="w-4 h-4"/> Danger Zone</TabsTrigger>
       </TabsList>
       
       <!-- Profile Tab -->
@@ -144,16 +188,33 @@ onMounted(() => {
           <Card>
               <CardHeader>
                   <CardTitle>Profile Information</CardTitle>
-                  <CardDescription>Update your account profile information and email address.</CardDescription>
+                  <CardDescription>Update your account profile information.</CardDescription>
               </CardHeader>
               <CardContent class="space-y-4">
+                  <div class="flex items-center gap-4 mb-4" v-if="form.avatar || form.google_id">
+                      <div class="relative">
+                        <img v-if="form.avatar" :src="form.avatar" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-slate-200 dark:border-slate-700">
+                        <div v-else class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
+                            {{ form.name.charAt(0).toUpperCase() }}
+                        </div>
+                         <div v-if="form.google_id" class="absolute -bottom-1 -right-1 bg-white dark:bg-slate-900 rounded-full p-1 border shadow-sm" title="Connected with Google">
+                             <svg class="w-4 h-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>
+                        </div>
+                      </div>
+                      <div>
+                          <p class="font-medium" v-if="form.google_id">Connected with Google</p>
+                          <p class="text-xs text-muted-foreground" v-if="form.google_id">Your account is linked to your Google account.</p>
+                      </div>
+                  </div>
+
                   <div class="grid gap-2">
                        <Label htmlFor="name">Display Name</Label>
                        <Input id="name" v-model="form.name" />
                   </div>
                   <div class="grid gap-2">
                        <Label htmlFor="email">Email Address</Label>
-                       <Input id="email" v-model="form.email" type="email" />
+                       <Input id="email" v-model="form.email" type="email" :disabled="!!form.google_id" />
+                       <p class="text-[10px] text-muted-foreground" v-if="form.google_id">Email managed by Google.</p>
                   </div>
               </CardContent>
               <CardFooter class="border-t px-6 py-4">
@@ -229,6 +290,54 @@ onMounted(() => {
                       <Loader2 v-if="isSaving" class="mr-2 h-4 w-4 animate-spin" />
                       Save Preferences
                   </Button>
+              </CardFooter>
+          </Card>
+      </TabsContent>
+
+      <!-- Account Tab (Danger Zone) -->
+      <TabsContent value="account" class="space-y-4">
+          <Card class="border-red-200 dark:border-red-900/50">
+              <CardHeader>
+                  <CardTitle class="text-red-600 dark:text-red-500">Danger Zone</CardTitle>
+                  <CardDescription>Irreversible actions for your account.</CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                  <div class="rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-900/20">
+                      <div class="flex items-start gap-4">
+                          <AlertTriangle class="h-5 w-5 text-red-600 mt-0.5" />
+                          <div class="space-y-1">
+                              <h4 class="font-medium text-red-900 dark:text-red-200">Delete Account</h4>
+                              <p class="text-sm text-red-700 dark:text-red-300">
+                                  Once you delete your account, there is no going back. All your decks, cards, and learning progress will be permanently removed.
+                              </p>
+                          </div>
+                      </div>
+                  </div>
+              </CardContent>
+              <CardFooter class="border-t border-red-200 bg-red-50/50 px-6 py-4 dark:border-red-900/50 dark:bg-red-900/10">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive" :disabled="isDeleting">
+                            <Loader2 v-if="isDeleting" class="mr-2 h-4 w-4 animate-spin" />
+                            Delete Account Permanently
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete your account
+                                and remove your data from our servers.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction @click="handleDeleteAccount" class="bg-red-600 hover:bg-red-700 text-white">
+                                Continue
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
               </CardFooter>
           </Card>
       </TabsContent>

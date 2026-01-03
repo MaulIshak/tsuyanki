@@ -114,6 +114,22 @@ class AuthController extends Controller
         ]);
     }
 
+    public function destroy(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Revoke tokens
+        $user->tokens()->delete();
+
+        // Delete user
+        $user->delete();
+
+        return response()->json([
+            'message' => 'Account deleted successfully',
+        ]);
+    }
+
+
     public function me(Request $request): JsonResponse
     {
         return response()->json(new UserResource($request->user()));
@@ -128,6 +144,10 @@ class AuthController extends Controller
             'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
             'preferences' => 'sometimes|array',
         ]);
+
+        if ($user->google_id && isset($validated['email'])) {
+            unset($validated['email']);
+        }
 
         $user->update($validated);
 

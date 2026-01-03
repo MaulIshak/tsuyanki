@@ -14,6 +14,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/auth/me', [AuthController::class, 'me']);
         Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
+        Route::delete('/auth/user', [AuthController::class, 'destroy']);
 
         Route::apiResource('decks', \App\Http\Controllers\Api\DeckController::class);
         Route::post('/decks/{deck}/fork', [\App\Http\Controllers\Api\DeckController::class, 'fork']);
