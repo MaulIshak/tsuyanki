@@ -314,13 +314,13 @@ const getNoteBack = (note) => {
             <ArrowLeft class="w-4 h-4" /> Back to Decks
         </Button>
 
-        <div class="flex justify-between items-start" v-if="deck">
+        <div class="flex justify-between items-start gap-4" v-if="deck">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{{ deck.title }}</h1>
-                <p class="text-slate-500 dark:text-slate-400 mt-1 max-w-3xl">{{ deck.description }}</p>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{{ deck.title }}</h1>
+                <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm sm:text-base max-w-3xl">{{ deck.description }}</p>
             </div>
-             <Button class="gap-2" @click="navigateToAdd">
-                <Plus class="w-4 h-4" /> Add Card
+             <Button class="gap-2 shrink-0" @click="navigateToAdd">
+                <Plus class="w-4 h-4" /> <span class="hidden sm:inline">Add Card</span>
             </Button>
         </div>
         <div v-else-if="isLoading">
@@ -331,11 +331,11 @@ const getNoteBack = (note) => {
 
     <!-- Content -->
     <Tabs defaultValue="cards" class="w-full">
-        <TabsList class="mb-4">
-            <TabsTrigger value="cards" class="gap-2">
+        <TabsList class="mb-4 w-full justify-start h-auto p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+            <TabsTrigger value="cards" class="gap-2 flex-1 sm:flex-none">
                 <FileText class="w-4 h-4" /> Cards
             </TabsTrigger>
-            <TabsTrigger value="settings" class="gap-2">
+            <TabsTrigger value="settings" class="gap-2 flex-1 sm:flex-none">
                 <Settings class="w-4 h-4" /> Settings
             </TabsTrigger>
         </TabsList>
@@ -343,21 +343,21 @@ const getNoteBack = (note) => {
         <TabsContent value="cards" class="space-y-4">
             
             <!-- Controls (Search, Filter, Sort) -->
-            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-lg border shadow-sm">
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center justify-between bg-white dark:bg-slate-900 p-3 rounded-lg border shadow-sm">
                 <div class="relative w-full sm:w-72">
                     <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                     <Input 
                         placeholder="Search cards..." 
-                        class="pl-9" 
+                        class="pl-9 h-9" 
                         v-model="searchQuery"
                         @input="onSearch"
                     />
                 </div>
                 
-                <div class="flex gap-2 w-full sm:w-auto">
+                <div class="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
                     <!-- Filter Tag -->
                     <Select v-model="filterTag" @update:model-value="onFilterChange">
-                        <SelectTrigger class="w-[150px]">
+                        <SelectTrigger class="w-[140px] h-9">
                             <div class="flex items-center gap-2">
                                 <Filter class="w-3.5 h-3.5" />
                                 <span class="truncate">{{ filterTag === 'all' ? 'All Tags' : filterTag }}</span>
@@ -374,10 +374,10 @@ const getNoteBack = (note) => {
                     <!-- Sort -->
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>
-                            <Button variant="outline" class="gap-2">
+                            <Button variant="outline" class="gap-2 h-9 px-3">
                                 <SortAsc v-if="sortOrder === 'asc'" class="w-4 h-4" />
                                 <SortDesc v-else class="w-4 h-4" />
-                                Sort
+                                <span class="hidden xs:inline">Sort</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-48">

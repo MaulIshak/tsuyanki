@@ -278,7 +278,7 @@ onUnmounted(() => {
 <template>
   <div class="absolute inset-0 z-0 bg-slate-100/50 dark:bg-black/20 pointer-events-none backdrop-blur-[2px]"></div>
 
-  <div class="relative z-10 min-h-full flex flex-col max-w-4xl mx-auto w-full p-4 lg:p-8">
+  <div class="relative z-10 min-h-full flex flex-col max-w-4xl mx-auto w-full p-3 sm:p-4 lg:p-8">
     
     <!-- MENU MODE -->
     <div v-if="viewMode === 'menu'" class="flex flex-col items-center justify-center flex-1 space-y-8 animate-in fade-in zoom-in-95 duration-500">
@@ -437,8 +437,8 @@ onUnmounted(() => {
           </div>
 
           <!-- Flashcard -->
-          <Card v-else class="w-full max-w-2xl shadow-2xl border-0 ring-1 ring-slate-900/5 dark:ring-white/10 dark:bg-slate-900/90 backdrop-blur-md overflow-hidden flex flex-col min-h-[400px] transition-all duration-300 hover:shadow-indigo-500/10">
-            <CardHeader class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 py-3 px-6">
+          <Card v-else class="w-full max-w-2xl shadow-2xl border-0 ring-1 ring-slate-900/5 dark:ring-white/10 dark:bg-slate-900/90 backdrop-blur-md overflow-hidden flex flex-col min-h-[calc(100vh-160px)] sm:min-h-[400px] transition-all duration-300 hover:shadow-indigo-500/10">
+            <CardHeader class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 py-3 px-4 sm:px-6">
                <div class="flex justify-between items-center">
                   <Badge variant="outline" class="uppercase tracking-wider text-[10px] font-semibold text-slate-500 border-slate-300 dark:border-slate-700">{{ currentCard.template?.name || 'Standard' }}</Badge>
                   <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">

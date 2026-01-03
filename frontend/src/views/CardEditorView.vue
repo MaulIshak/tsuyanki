@@ -320,15 +320,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-4 lg:p-6 max-w-3xl mx-auto space-y-6">
+  <div class="p-3 lg:p-6 max-w-3xl mx-auto space-y-4 sm:space-y-6">
     <Button variant="ghost" class="pl-0 gap-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100" @click="router.back()">
         <ArrowLeft class="w-4 h-4" /> Back
     </Button>
 
     <Card>
-        <CardHeader>
-            <CardTitle>{{ noteId ? 'Edit Card' : 'Add New Card' }}</CardTitle>
-            <CardDescription>
+        <CardHeader class="pb-4">
+            <CardTitle class="text-xl sm:text-2xl">{{ noteId ? 'Edit Card' : 'Add New Card' }}</CardTitle>
+            <CardDescription class="text-xs sm:text-sm">
                 {{ noteId ? 'Update the content of this card.' : 'Create a new card.' }}
             </CardDescription>
         </CardHeader>
@@ -351,8 +351,8 @@ onMounted(() => {
 
             <!-- Dynamic Fields -->
             <div class="space-y-4" v-if="activeFields.length > 0">
-                 <div v-for="(field, idx) in activeFields" :key="field.name" class="space-y-2">
-                    <label class="text-sm font-medium">{{ field.name }}</label>
+                 <div v-for="(field, idx) in activeFields" :key="field.name" class="space-y-1.5">
+                    <label class="text-xs sm:text-sm font-medium">{{ field.name }}</label>
                     <RichTextEditor
                         :ref="(el) => { if (el) fieldEditors[field.name] = el }"
                         v-model="fields[field.name]"

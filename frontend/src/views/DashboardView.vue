@@ -88,10 +88,10 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
 <template>
   <div class="flex flex-col gap-4 md:gap-6 pb-20 md:pb-0">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Dashboard</h1>
-        <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-base">Welcome back! Let's make some progress today.</p>
+        <h1 class="text-xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Dashboard</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-base">Welcome back! Let's make some progress today.</p>
       </div>
       <div class="flex items-center gap-2">
          <!-- Date Display or similar could go here -->
@@ -108,15 +108,15 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
             <!-- Decorative soft blobs for depth inside the card -->
             <div class="absolute top-1/2 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
 
-            <CardContent class="relative z-10 p-6 sm:p-8 flex flex-col items-start justify-center h-full">
-                <div class="flex items-center gap-2 mb-4">
+            <CardContent class="relative z-10 p-5 sm:p-8 flex flex-col items-start justify-center h-full">
+                <div class="flex items-center gap-2 mb-3">
                     <Badge variant="secondary" class="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm">
                         <Flame class="w-3 h-3 mr-1 text-orange-200" /> {{ streak }} Day Streak
                     </Badge>
                 </div>
                 
-                <h2 class="text-3xl font-bold mb-2 tracking-tight">Ready to flow?</h2>
-                <p class="text-indigo-50 mb-8 max-w-lg text-lg leading-relaxed">
+                <h2 class="text-2xl sm:text-3xl font-bold mb-2 tracking-tight">Ready to flow?</h2>
+                <p class="text-indigo-50 mb-6 max-w-lg text-base sm:text-lg leading-relaxed">
                     You have <span class="font-bold text-white">{{ dueCount }} cards</span> waiting for review. 
                     Consistency is the path to mastery.
                 </p>
@@ -142,7 +142,7 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
                  <Skeleton class="h-16 w-full rounded-lg" />
              </div>
              
-             <div v-else-if="recentDecks.length === 0" class="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-slate-400 bg-slate-50/50 dark:bg-slate-900/50">
+             <div v-else-if="recentDecks.length === 0" class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-slate-400 bg-slate-50/50 dark:bg-slate-900/50">
                  <PlusCircle class="h-8 w-8 mb-2 opacity-50" />
                  <p class="text-sm">No decks yet</p>
                  <Button variant="link" @click="router.push('/decks/create')">Create one</Button>
@@ -171,8 +171,9 @@ const maxActivity = computed(() => Math.max(...recentActivity.value, 1))
         </div>
     </div>
 
+
     <!-- Stats Row Detailed -->
-    <div class="grid gap-4 md:grid-cols-3">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
       <!-- Cards Due -->
       <Card class="border-none shadow-md bg-white dark:bg-slate-800/50 backdrop-blur-sm overflow-hidden relative group hover:shadow-lg transition-all duration-300">
         <div class="absolute right-0 top-0 opacity-5 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500 text-indigo-500">

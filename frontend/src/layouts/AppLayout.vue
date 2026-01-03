@@ -46,7 +46,7 @@ provide('isSidebarCollapsed', isSidebarCollapsed)
     <!-- Main Content Area -->
     <div class="flex flex-col h-full overflow-hidden relative z-10 transition-all duration-500">
       <AppHeader class="bg-background/60 backdrop-blur-md border-b border-border/40 sticky top-0 z-30" />
-      <main class="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth">
+      <main class="flex-1 overflow-y-auto p-3 lg:p-6 scroll-smooth">
         <div class="max-w-7xl mx-auto w-full ease-in-out duration-500">
           <RouterView v-slot="{ Component }">
             <component :is="Component" />

@@ -1,1 +1,0 @@
-import{l as a,o as t,r as o,z as l,u as n,f as c}from"./index-JnNFLN65.js";const d={__name:"CardDescription",props:{class:{type:null,required:!1}},setup(s){const e=s;return(r,p)=>(t(),a("p",{"data-slot":"card-description",class:l(n(c)("text-muted-foreground text-sm",e.class))},[o(r.$slots,"default")],2))}};export{d as _};

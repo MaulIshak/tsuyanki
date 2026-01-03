@@ -116,16 +116,16 @@ const onUpload = async () => {
 </script>
 
 <template>
-  <div class="p-4 sm:p-6 max-w-3xl mx-auto space-y-6 sm:space-y-10">
+  <div class="p-4 sm:p-8 max-w-3xl mx-auto space-y-6 sm:space-y-8">
     
     <!-- Page Header -->
     <div class="flex items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-3 mb-1">
-                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Import from Anki</h1>
-                <Badge variant="secondary" class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800">Beta</Badge>
+                <h1 class="text-xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Import from Anki</h1>
+                <Badge variant="secondary" class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 text-xs">Beta</Badge>
             </div>
-            <p class="text-slate-500 dark:text-slate-400 text-lg">Migrate your decks and cards effortlessly.</p>
+            <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-lg">Migrate your decks and cards effortlessly.</p>
         </div>
         <!-- <Button variant="outline" @click="router.back()" class="hidden sm:flex">
             <ArrowLeft class="w-4 h-4 mr-2" /> Back
@@ -170,7 +170,7 @@ const onUpload = async () => {
                 </Alert>
 
                 <div 
-                    class="relative border-4 border-dashed rounded-2xl p-6 sm:p-12 transition-all cursor-pointer group flex flex-col items-center justify-center min-h-[300px]"
+                    class="relative border-2 sm:border-4 border-dashed rounded-xl sm:rounded-2xl p-6 sm:p-12 transition-all cursor-pointer group flex flex-col items-center justify-center min-h-[200px] sm:min-h-[300px]"
                     :class="[
                         isDragging ? 'border-indigo-500 bg-indigo-50/50 scale-[1.01]' : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900/50 dark:hover:border-slate-700',
                         file ? 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-950/10 dark:border-emerald-800' : ''

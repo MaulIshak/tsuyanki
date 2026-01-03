@@ -163,12 +163,12 @@ const navigateToDeck = (id) => {
 </script>
 
 <template>
-  <div class="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
+  <div class="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">My Decks</h1>
-        <p class="text-slate-500 dark:text-slate-400">Manage your flashcard collections.</p>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">My Decks</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm">Manage your flashcard collections.</p>
       </div>
       <Button @click="router.push('/decks/create')" class="gap-2">
         <Plus class="w-4 h-4" /> Create Deck

@@ -53,7 +53,7 @@ const onSubmit = async () => {
 </script>
 
 <template>
-  <div class="p-6 max-w-2xl mx-auto space-y-6">
+  <div class="p-4 lg:p-6 max-w-2xl mx-auto space-y-4 sm:space-y-6">
     <Button variant="ghost" class="pl-0 gap-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100" @click="router.back()">
         <ArrowLeft class="w-4 h-4" /> Back
     </Button>

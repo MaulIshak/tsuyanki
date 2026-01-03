@@ -184,7 +184,7 @@ onMounted(() => {
             <User class="w-4 h-4" /> Profile
         </div>
         <Card class="border-indigo-100 dark:border-indigo-900/50 shadow-sm overflow-hidden">
-            <CardContent class="p-6 md:p-8 space-y-8">
+            <CardContent class="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
                 <div class="flex flex-col md:flex-row gap-8 items-start">
                     <div class="flex-1 space-y-4 w-full">
                         <div class="grid gap-2">
@@ -232,7 +232,7 @@ onMounted(() => {
                 <BookOpen class="w-4 h-4" /> Learning
             </div>
             <Card class="flex-1 h-full shadow-sm">
-                <CardContent class="p-6 space-y-6">
+                <CardContent class="p-4 sm:p-6 space-y-6">
                     <div class="space-y-4">
                         <Label class="text-base font-medium">Daily New Cards</Label>
                         <p class="text-sm text-slate-500 dark:text-slate-400">How many new cards do you want to learn each day?</p>
@@ -255,7 +255,7 @@ onMounted(() => {
                 <Monitor class="w-4 h-4" /> Appearance
             </div>
              <Card class="flex-1 h-full shadow-sm">
-                <CardContent class="p-6 space-y-6">
+                <CardContent class="p-4 sm:p-6 space-y-6">
                      <div class="space-y-4">
                         <Label class="text-base font-medium">Theme Preference</Label>
                          <p class="text-sm text-slate-500 dark:text-slate-400">Choose how Tsuyanki looks to you.</p>
@@ -294,7 +294,7 @@ onMounted(() => {
             <AlertTriangle class="w-4 h-4" /> Danger Zone
         </div>
         <Card class="border-red-100 bg-red-50/30 dark:border-red-900/30 dark:bg-red-900/10 shadow-sm border-dashed">
-            <CardContent class="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <CardContent class="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                 <div class="space-y-1">
                     <h4 class="font-medium text-red-900 dark:text-red-200">Delete Account</h4>
                     <p class="text-sm text-red-700/80 dark:text-red-300/70 max-w-lg">
