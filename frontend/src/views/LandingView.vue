@@ -304,11 +304,11 @@ import {
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                  <Button size="lg" as-child class="h-14 px-10 text-lg rounded-full bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 transition-all hover:scale-105">
-                    <RouterLink to="/register">Create Free Account</RouterLink>
+                    <RouterLink to="/register">Create Account</RouterLink>
                 </Button>
             </div>
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-6">
-                No credit card required. Free for personal use.
+                No credit card required.
             </p>
         </div>
     </section>
@@ -333,11 +333,11 @@ import {
                     <RouterLink to="/login" class="hover:text-indigo-600 dark:hover:text-indigo-400">Log In</RouterLink>
 
                 </div>
-                <div class="flex flex-col gap-3">
+                <!-- <div class="flex flex-col gap-3">
                     <h4 class="font-bold text-slate-900 dark:text-slate-200">Legal</h4>
                     <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400">Privacy Policy</a>
                     <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400">Terms of Service</a>
-                </div>
+                </div> -->
             </div>
         </div>
         <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-slate-100 dark:border-slate-900 text-center text-xs text-slate-400">
