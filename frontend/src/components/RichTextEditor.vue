@@ -18,7 +18,17 @@ import {
     Sigma, Type, Paperclip
 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
-import { watch, onBeforeUnmount } from 'vue'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { watch, onBeforeUnmount, ref, reactive } from 'vue'
 
 const props = defineProps({
     modelValue: {
@@ -62,6 +72,11 @@ watch(() => props.modelValue, (value) => {
     }
 })
 
+// Modal States
+const linkModal = reactive({ open: false, url: '' })
+const mathModal = reactive({ open: false, expression: 'E=mc^2' })
+const furiganaModal = reactive({ open: false, text: '', reading: '' })
+
 // Toolbar Actions
 const toggleBold = () => editor.value.chain().focus().toggleBold().run()
 const toggleItalic = () => editor.value.chain().focus().toggleItalic().run()
@@ -70,40 +85,54 @@ const toggleUnderline = () => editor.value.chain().focus().toggleUnderline().run
 const toggleSubscript = () => editor.value.chain().focus().toggleSubscript().run()
 const toggleSuperscript = () => editor.value.chain().focus().toggleSuperscript().run()
 
-const addMath = () => {
-    const expression = prompt('Enter LaTeX equation (e.g. E=mc^2):', 'E=mc^2')
-    if (expression) {
-        editor.value.chain().focus().setMath(expression).run()
-    }
+const openMathModal = () => {
+    mathModal.expression = 'E=mc^2' // Reset or keep previous?
+    mathModal.open = true
 }
 
-const addFurigana = () => {
-    const text = prompt('Enter text (Kanji):')
-    if (!text) return
-    const reading = prompt('Enter reading (Kana):')
-    if (reading) {
-        editor.value.chain().focus().setFurigana(text, reading).run()
+const saveMath = () => {
+    if (mathModal.expression) {
+        editor.value.chain().focus().setMath(mathModal.expression).run()
     }
+    mathModal.open = false
+}
+
+const openFuriganaModal = () => {
+    // Try to get current selection if it's text
+    const { from, to, empty } = editor.value.state.selection
+    if (!empty) {
+        furiganaModal.text = editor.value.state.doc.textBetween(from, to)
+    } else {
+        furiganaModal.text = ''
+    }
+    furiganaModal.reading = ''
+    furiganaModal.open = true
+}
+
+const saveFurigana = () => {
+    if (furiganaModal.text) {
+        editor.value.chain().focus().setFurigana(furiganaModal.text, furiganaModal.reading).run()
+    }
+    furiganaModal.open = false
 }
 
 const triggerMediaUpload = () => {
     emit('on-media-upload')
 }
 
-const addLink = () => {
+const openLinkModal = () => {
     const previousUrl = editor.value.getAttributes('link').href
-    const url = window.prompt('URL', previousUrl)
+    linkModal.url = previousUrl || ''
+    linkModal.open = true
+}
 
-    if (url === null) {
-        return
-    }
-
-    if (url === '') {
+const saveLink = () => {
+    if (linkModal.url === '') {
         editor.value.chain().focus().extendMarkRange('link').unsetLink().run()
-        return
+    } else {
+         editor.value.chain().focus().extendMarkRange('link').setLink({ href: linkModal.url }).run()
     }
-
-    editor.value.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+    linkModal.open = false
 }
 
 onBeforeUnmount(() => {
@@ -155,16 +184,16 @@ defineExpose({
             
             <div class="w-px h-6 bg-slate-300 dark:bg-slate-700 mx-1"></div>
             
-            <Button size="icon" variant="ghost" class="h-8 w-8" @click="addMath" title="Insert Equation">
+            <Button size="icon" variant="ghost" class="h-8 w-8" @click="openMathModal" title="Insert Equation">
                 <Sigma class="w-4 h-4" />
             </Button>
-            <Button size="icon" variant="ghost" class="h-8 w-8" @click="addFurigana" title="Insert Furigana">
+            <Button size="icon" variant="ghost" class="h-8 w-8" @click="openFuriganaModal" title="Insert Furigana">
                 <Type class="w-4 h-4" /> <!-- Using Type icon for Furigana/Text -->
             </Button>
             
              <div class="w-px h-6 bg-slate-300 dark:bg-slate-700 mx-1"></div>
 
-            <Button size="icon" variant="ghost" class="h-8 w-8" @click="addLink" :class="{ 'bg-slate-200 dark:bg-slate-800': editor.isActive('link') }">
+            <Button size="icon" variant="ghost" class="h-8 w-8" @click="openLinkModal" :class="{ 'bg-slate-200 dark:bg-slate-800': editor.isActive('link') }">
                 <LinkIcon class="w-4 h-4" />
             </Button>
             <Button size="icon" variant="ghost" class="h-8 w-8" @click="triggerMediaUpload" title="Insert Media">
@@ -173,6 +202,76 @@ defineExpose({
         </div>
 
         <EditorContent :editor="editor" class="p-4 min-h-[150px] prose dark:prose-invert max-w-none focus:outline-none" />
+
+        <!-- Link Modal -->
+        <Dialog v-model:open="linkModal.open">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Insert Link</DialogTitle>
+                    <DialogDescription>
+                        Enter the URL to link to.
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="flex items-center space-x-2">
+                    <div class="grid flex-1 gap-2">
+                         <Label htmlFor="linkUrl" class="sr-only">Link</Label>
+                         <Input id="linkUrl" v-model="linkModal.url" placeholder="https://example.com" @keyup.enter="saveLink" />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button type="button" variant="secondary" @click="linkModal.open = false">Cancel</Button>
+                    <Button type="button" @click="saveLink">Save</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+         <!-- Math Modal -->
+        <Dialog v-model:open="mathModal.open">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Insert Equation</DialogTitle>
+                    <DialogDescription>
+                        Enter a LaTeX equation.
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="flex items-center space-x-2">
+                    <div class="grid flex-1 gap-2">
+                         <Label htmlFor="mathExpr" class="sr-only">Equation</Label>
+                         <Input id="mathExpr" v-model="mathModal.expression" placeholder="E=mc^2" @keyup.enter="saveMath" />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button type="button" variant="secondary" @click="mathModal.open = false">Cancel</Button>
+                    <Button type="button" @click="saveMath">Insert</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <!-- Furigana Modal -->
+        <Dialog v-model:open="furiganaModal.open">
+             <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Insert Furigana</DialogTitle>
+                    <DialogDescription>
+                        Add reading aid (Furigana) to text.
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="grid gap-4 py-4">
+                    <div class="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="furiText" class="text-right">Text</Label>
+                        <Input id="furiText" v-model="furiganaModal.text" class="col-span-3" placeholder="Kanji" />
+                    </div>
+                     <div class="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="furiReading" class="text-right">Reading</Label>
+                        <Input id="furiReading" v-model="furiganaModal.reading" class="col-span-3" placeholder="Kana" @keyup.enter="saveFurigana" />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button type="button" variant="secondary" @click="furiganaModal.open = false">Cancel</Button>
+                    <Button type="button" @click="saveFurigana">Insert</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 
